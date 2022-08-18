@@ -167,3 +167,30 @@
     width: 37.5vw;
   }
 }
+.mapIcon {
+  /* Font */
+  composes: marketplaceTinyFontStyles from global;
+  font-weight: var(--fontWeightMedium);
+
+  /* background map image */
+  background-image: url('/src/components/SearchFiltersMobile/images/map_icon216x105.png');
+  background-size: cover;
+
+  border-radius: 3px;
+  width: 72px;
+  height: 35px;
+  padding: 9px 22px;
+  margin: 0;
+}
+.searchFiltersPanelClosed {
+  composes: button marketplaceSearchFilterLabelFontStyles buttonText buttonBordersSecondary buttonColorsSecondary from global;
+  letter-spacing: 0.2px;
+
+  display: inline-block;
+  width: auto;
+  height: auto;
+  min-height: 0;
+  border-radius: 4px;
+  padding: 0;
+
+}

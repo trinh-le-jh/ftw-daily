@@ -37,6 +37,7 @@ export class SearchPageComponent extends Component {
     this.state = {
       isSearchMapOpenOnMobile: props.tab === 'map',
       isMobileModalOpen: false,
+      isShowMapOnDesktop: true,
     };
 
     this.searchMapListingsInProgress = false;
@@ -139,11 +140,14 @@ export class SearchPageComponent extends Component {
     const isWindowDefined = typeof window !== 'undefined';
     const isMobileLayout = isWindowDefined && window.innerWidth < MODAL_BREAKPOINT;
     const shouldShowSearchMap =
-      !isMobileLayout || (isMobileLayout && this.state.isSearchMapOpenOnMobile);
-
+      (!isMobileLayout && this.state.isShowMapOnDesktop) || (isMobileLayout && this.state.isSearchMapOpenOnMobile);
     const onMapIconClick = () => {
-      this.useLocationSearchBounds = true;
-      this.setState({ isSearchMapOpenOnMobile: true });
+      if(isMobileLayout) {
+        this.useLocationSearchBounds = true;
+        this.setState({ isSearchMapOpenOnMobile: true });
+      } else {
+        this.setState({ isShowMapOnDesktop: !this.state.isShowMapOnDesktop });
+      }
     };
 
     const { address, bounds, origin } = searchInURL || {};

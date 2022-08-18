@@ -238,6 +238,13 @@ class MainPanel extends Component {
           searchListingsError={searchListingsError}
           {...propsForSecondaryFiltersToggle}
         >
+          <button
+            className={css.searchFiltersPanelClosed}
+          >
+            <div className={css.mapIcon} onClick={onMapIconClick}>
+              <FormattedMessage id="SearchFiltersMobile.openMapView" className={css.mapIconText} />
+            </div>
+          </button>
           {primaryFilters.map(config => {
             return (
               <FilterComponent
