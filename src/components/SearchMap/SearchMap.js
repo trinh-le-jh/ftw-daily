@@ -10,14 +10,14 @@ import { obfuscatedCoordinates } from '../../util/maps';
 import config from '../../config';
 
 import { hasParentWithClassName } from './SearchMap.helpers.js';
-import SearchMapWithMapbox, {
+import SearchMapWithGoogleMaps, {
   LABEL_HANDLE,
   INFO_CARD_HANDLE,
   getMapBounds,
   getMapCenter,
   fitMapToBounds,
   isMapsLibLoaded,
-} from './SearchMapWithMapbox';
+} from './SearchMapWithGoogleMaps';
 import ReusableMapContainer from './ReusableMapContainer';
 import css from './SearchMap.module.css';
 
@@ -143,10 +143,10 @@ export class SearchMapComponent extends Component {
       this.setState({ mapReattachmentCount: window.mapReattachmentCount });
     };
 
-    // When changing from default map provider to Google Maps, you should use the following
-    // component instead of SearchMapWithMapbox:
+    // When changing from default map provider to Mapbox, you should use the following
+    // component instead of SearchMapWithGoogleMaps:
     //
-    // <SearchMapWithGoogleMaps
+    // <SearchMapWithMapbox
     //   id={id}
     //   className={classes}
     //   bounds={bounds}
@@ -173,7 +173,7 @@ export class SearchMapComponent extends Component {
         onReattach={forceUpdateHandler}
         messages={messages}
       >
-        <SearchMapWithMapbox
+        <SearchMapWithGoogleMaps
           id={id}
           className={classes}
           bounds={bounds}
