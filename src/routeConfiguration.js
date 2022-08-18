@@ -15,6 +15,7 @@ const AuthenticationPage = loadable(() => import(/* webpackChunkName: "Authentic
 const CheckoutPage = loadable(() => import(/* webpackChunkName: "CheckoutPage" */ './containers/CheckoutPage/CheckoutPage'));
 const ContactDetailsPage = loadable(() => import(/* webpackChunkName: "ContactDetailsPage" */ './containers/ContactDetailsPage/ContactDetailsPage'));
 const EditListingPage = loadable(() => import(/* webpackChunkName: "EditListingPage" */ './containers/EditListingPage/EditListingPage'));
+const EditEquipmentListingPage = loadable(() => import(/* webpackChunkName: "EditEquipmentListingPage" */ './containers/EditEquipmentListingPage/EditEquipmentListingPage'));
 const EmailVerificationPage = loadable(() => import(/* webpackChunkName: "EmailVerificationPage" */ './containers/EmailVerificationPage/EmailVerificationPage'));
 const InboxPage = loadable(() => import(/* webpackChunkName: "InboxPage" */ './containers/InboxPage/InboxPage'));
 const LandingPage = loadable(() => import(/* webpackChunkName: "LandingPage" */ './containers/LandingPage/LandingPage'));
@@ -45,6 +46,7 @@ export const ACCOUNT_SETTINGS_PAGES = [
 // https://en.wikipedia.org/wiki/Universally_unique_identifier#Nil_UUID
 const draftId = '00000000-0000-0000-0000-000000000000';
 const draftSlug = 'draft';
+const subSlug = 'equipment';
 
 const RedirectToLandingPage = () => <NamedRedirect name="LandingPage" />;
 
@@ -110,6 +112,30 @@ const routeConfiguration = () => {
           params={{ slug: draftSlug, id: draftId, type: 'new', tab: 'description' }}
         />
       ),
+    },
+    {
+      path: '/l/newEquipment',
+      name: 'NewEquipmentListingPage',
+      auth: true,
+      component: () => (
+        <NamedRedirect
+          name="EditEquipmentListingPage"
+          params={{
+            slug: draftSlug,
+            sub: subSlug,
+            id: draftId,
+            type: 'new',
+            tab: 'description'
+          }}
+        />
+      ),
+    },
+    {
+      path: '/l/:slug/:sub/:id/:type/:tab',
+      name: 'EditEquipmentListingPage',
+      auth: true,
+      component: EditEquipmentListingPage,
+      loadData: pageDataLoadingAPI.EditEquipmentListingPage.loadData,
     },
     {
       path: '/l/:slug/:id/:type/:tab',
