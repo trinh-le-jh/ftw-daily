@@ -158,6 +158,7 @@ export { default as ModalMissingInformation } from './ModalMissingInformation/Mo
 export { default as ReviewModal } from './ReviewModal/ReviewModal';
 export { default as PrivacyPolicy } from './PrivacyPolicy/PrivacyPolicy';
 export { default as TermsOfService } from './TermsOfService/TermsOfService';
+
 export { default as EditListingAvailabilityPanel } from './EditListingAvailabilityPanel/EditListingAvailabilityPanel';
 export { default as EditListingDescriptionPanel } from './EditListingDescriptionPanel/EditListingDescriptionPanel';
 export { default as EditListingFeaturesPanel } from './EditListingFeaturesPanel/EditListingFeaturesPanel';
@@ -166,6 +167,14 @@ export { default as EditListingPhotosPanel } from './EditListingPhotosPanel/Edit
 export { default as EditListingPoliciesPanel } from './EditListingPoliciesPanel/EditListingPoliciesPanel';
 export { default as EditListingPricingPanel } from './EditListingPricingPanel/EditListingPricingPanel';
 export { default as EditListingWizard } from './EditListingWizard/EditListingWizard';
+
+export { default as EditEquipmentListingGeneralPanel } from './EditEquipmentListingGeneralPanel/EditEquipmentListingGeneralPanel';
+export { default as EditEquipmentListingLocationPanel } from './EditEquipmentListingLocationPanel/EditEquipmentListingLocationPanel';
+export { default as EditEquipmentListingPricingPanel } from './EditEquipmentListingPricingPanel/EditEquipmentListingPricingPanel';
+export { default as EditEquipmentListingAvailabilityPanel } from './EditEquipmentListingAvailabilityPanel/EditEquipmentListingAvailabilityPanel';
+export { default as EditEquipmentListingPhotosPanel } from './EditEquipmentListingPhotosPanel/EditEquipmentListingPhotosPanel';
+export { default as EditEquipmentListingWizard } from './EditEquipmentListingWizard/EditEquipmentListingWizard';
+
 export { default as Footer } from './Footer/Footer';
 export { default as SectionHero } from './SectionHero/SectionHero';
 export { default as SectionHowItWorks } from './SectionHowItWorks/SectionHowItWorks';

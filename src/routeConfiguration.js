@@ -125,7 +125,7 @@ const routeConfiguration = () => {
             sub: subSlug,
             id: draftId,
             type: 'new',
-            tab: 'description'
+            tab: 'general'
           }}
         />
       ),
