@@ -46,7 +46,6 @@ export const ACCOUNT_SETTINGS_PAGES = [
 // https://en.wikipedia.org/wiki/Universally_unique_identifier#Nil_UUID
 const draftId = '00000000-0000-0000-0000-000000000000';
 const draftSlug = 'draft';
-const subSlug = 'equipment';
 
 const RedirectToLandingPage = () => <NamedRedirect name="LandingPage" />;
 
@@ -75,6 +74,29 @@ const routeConfiguration = () => {
       name: 'SearchPage',
       component: SearchPage,
       loadData: pageDataLoadingAPI.SearchPage.loadData,
+    },
+    {
+      path: '/e/new',
+      name: 'NewEquipmentListingPage',
+      auth: true,
+      component: () => (
+        <NamedRedirect
+          name="EditEquipmentListingPage"
+          params={{
+            slug: draftSlug,
+            id: draftId,
+            type: 'new',
+            tab: 'general'
+          }}
+        />
+      ),
+    },
+    {
+      path: '/e/:slug/:id/:type/:tab',
+      name: 'EditEquipmentListingPage',
+      auth: true,
+      component: EditEquipmentListingPage,
+      loadData: pageDataLoadingAPI.EditEquipmentListingPage.loadData,
     },
     {
       path: '/l',
@@ -125,7 +147,7 @@ const routeConfiguration = () => {
             sub: subSlug,
             id: draftId,
             type: 'new',
-            tab: 'description'
+            tab: 'general'
           }}
         />
       ),

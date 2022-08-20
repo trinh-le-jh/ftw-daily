@@ -22,7 +22,7 @@ import {
   getStripeConnectAccountLink,
 } from '../../ducks/stripeConnectAccount.duck';
 
-import { EditListingWizard, NamedRedirect, Page } from '../../components';
+import { EditEquipmentListingWizard, NamedRedirect, Page } from '../../components';
 import { TopbarContainer } from '../../containers';
 
 import {
@@ -177,7 +177,7 @@ export const EditEquipmentListingPageComponent = props => {
           desktopClassName={css.desktopTopbar}
           mobileClassName={css.mobileTopbar}
         />
-        <EditListingWizard
+        <EditEquipmentListingWizard
           id="EditListingWizard"
           className={css.wizard}
           params={params}

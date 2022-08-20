@@ -146,7 +146,7 @@
   --LandingPage_sectionMarginTopMedium: 60px;
   --LandingPage_sectionMarginTopLarge: 94px;
 
-  /* ================ EditListingAvailabilityForm, ManageAvailabilityCalendar ================ */
+  /* ================ EditListingAvailabilityForm, ManageEquipmentAvailabilityCalendar ================ */
   --ManageAvailabilityCalendar_gridColor: #e0e0e0;
   --ManageAvailabilityCalendar_availableColor: #ffffff;
   --ManageAvailabilityCalendar_availableColorHover: #fafafa;
@@ -671,7 +671,7 @@ textarea {
  * For actual buttons, use components: <Button>, <PrimaryButton>, <SecondaryButton>
  *
  * To create button look-and-feel for links, etc. combine button classes in CSS Modules:
- * 
+ *
  * default button:
  *   composes: button buttonFont buttonText buttonBorders buttonColors from global;
  * primary button:
