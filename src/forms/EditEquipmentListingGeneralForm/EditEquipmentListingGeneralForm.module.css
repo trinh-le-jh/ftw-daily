@@ -16,11 +16,6 @@
     padding-top: 2px;
   }
 }
-
-.error {
-  color: var(--failColor);
-}
-
 .formMargins {
   margin-bottom: 24px;
 
@@ -29,17 +24,13 @@
   }
 }
 
-.title {
-  composes: formMargins;
+.error {
+  color: var(--failColor);
 }
 
-.description {
+.fieldContainer {
   composes: formMargins;
   flex-shrink: 0;
-}
-
-.category {
-  composes: formMargins;
 }
 
 .submitButton {
@@ -52,4 +43,7 @@
     width: 241px;
     margin-top: 100px;
   }
+}
+.inputNumber {
+  height: 58px;
 }

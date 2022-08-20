@@ -153,14 +153,14 @@ const EditEquipmentListingWizardTab = props => {
   switch (tab) {
     case GENERAL: {
       const submitButtonTranslationKey = isNewListingFlow
-        ? 'EditListingWizard.saveNewDescription'
+        ? 'EditEquipmentListingWizard.saveGeneral'
         : 'EditListingWizard.saveEditDescription';
       return (
         <EditEquipmentListingGeneralPanel
           {...panelProps(GENERAL)}
           submitButtonText={intl.formatMessage({ id: submitButtonTranslationKey })}
           onSubmit={values => {
-            onCompleteEditListingWizardTab(tab, values);
+            onCompleteEditEquipmentListingWizardTab(tab, values);
           }}
         />
       );

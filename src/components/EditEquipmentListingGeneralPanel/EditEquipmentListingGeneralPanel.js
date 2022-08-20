@@ -33,11 +33,11 @@ const EditEquipmentListingGeneralPanel = props => {
   const isPublished = currentListing.id && currentListing.attributes.state !== LISTING_STATE_DRAFT;
   const panelTitle = isPublished ? (
     <FormattedMessage
-      id="EditListingDescriptionPanel.title"
+      id="EditEquipmentListingGeneralPanel.title"
       values={{ listingTitle: <ListingLink listing={listing} /> }}
     />
   ) : (
-    <FormattedMessage id="EditListingDescriptionPanel.createListingTitle" />
+    <FormattedMessage id="EditEquipmentListingGeneralPanel.createListingTitle" />
   );
 
   const categoryOptions = findOptionsForSelectFilter('category', config.custom.filters);
@@ -49,13 +49,19 @@ const EditEquipmentListingGeneralPanel = props => {
         initialValues={{ title, description, category: publicData.category }}
         saveActionMsg={submitButtonText}
         onSubmit={values => {
-          const { title, description, category } = values;
+          const { title, description, type = [], manufacture, rules } = values;
           const updateValues = {
             title: title.trim(),
             description,
-            publicData: { category },
+            publicData: {
+              title,
+              description,
+              type,
+              manufacture,
+              rules,
+              isEquipment: true,
+            },
           };
-
           onSubmit(updateValues);
         }}
         onChange={onChange}
