@@ -46,7 +46,13 @@ const EditEquipmentListingGeneralPanel = props => {
       <h1 className={css.title}>{panelTitle}</h1>
       <EditEquipmentListingGeneralForm
         className={css.form}
-        initialValues={{ title, description, category: publicData.category }}
+        initialValues={{
+          title,
+          description,
+          type: publicData.type,
+          manufacture: publicData.manufacture,
+          rules: publicData.rules,
+        }}
         saveActionMsg={submitButtonText}
         onSubmit={values => {
           const { title, description, type = [], manufacture, rules } = values;
@@ -55,7 +61,6 @@ const EditEquipmentListingGeneralPanel = props => {
             description,
             publicData: {
               title,
-              description,
               type,
               manufacture,
               rules,

@@ -7,7 +7,7 @@ import {
   LISTING_PAGE_PARAM_TYPE_NEW,
   LISTING_PAGE_PARAM_TYPES,
 } from '../../util/urlHelpers';
-import { ensureListing } from '../../util/data';
+import { ensureEquipmentListing } from '../../util/data';
 import { createResourceLocatorString } from '../../util/routes';
 import {
   EditEquipmentListingAvailabilityPanel,
@@ -55,13 +55,13 @@ const redirectAfterDraftUpdate = (listingId, params, tab, marketplaceTabs, histo
   // Replace current "new" path to "draft" path.
   // Browser's back button should lead to editing current draft instead of creating a new one.
   if (params.type === LISTING_PAGE_PARAM_TYPE_NEW) {
-    const draftURI = createResourceLocatorString('EditListingPage', routes, currentPathParams, {});
+    const draftURI = createResourceLocatorString('EditEquipmentListingPage', routes, currentPathParams, {});
     history.replace(draftURI);
   }
 
   // Redirect to next tab
   const nextPathParams = pathParamsToNextTab(currentPathParams, tab, marketplaceTabs);
-  const to = createResourceLocatorString('EditListingPage', routes, nextPathParams, {});
+  const to = createResourceLocatorString('EditEquipmentListingPage', routes, nextPathParams, {});
   history.push(to);
 };
 
@@ -95,7 +95,7 @@ const EditEquipmentListingWizardTab = props => {
   const isDraftURI = type === LISTING_PAGE_PARAM_TYPE_DRAFT;
   const isNewListingFlow = isNewURI || isDraftURI;
 
-  const currentListing = ensureListing(listing);
+  const currentListing = ensureEquipmentListing(listing);
   const imageIds = images => {
     return images ? images.map(img => img.imageId || img.id) : null;
   };

@@ -182,6 +182,16 @@ export const ensureListing = listing => {
   return { ...empty, ...listing };
 };
 
+export const ensureEquipmentListing = listing => {
+  const empty = {
+    id: null,
+    type: 'equipment',
+    attributes: { publicData: {} },
+    images: [],
+  };
+  return { ...empty, ...listing };
+};
+
 /**
  * Create shell objects to ensure that attributes etc. exists.
  *

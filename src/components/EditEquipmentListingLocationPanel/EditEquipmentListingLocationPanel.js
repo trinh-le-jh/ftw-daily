@@ -5,7 +5,7 @@ import { FormattedMessage } from '../../util/reactIntl';
 import { LISTING_STATE_DRAFT } from '../../util/types';
 import { ensureOwnListing } from '../../util/data';
 import { ListingLink } from '../../components';
-import { EditListingLocationForm } from '../../forms';
+import { EditEquipmentListingLocationForm } from '../../forms';
 
 import css from './EditEquipmentListingLocationPanel.module.css';
 
@@ -75,7 +75,7 @@ class EditEquipmentListingLocationPanel extends Component {
     return (
       <div className={classes}>
         <h1 className={css.title}>{panelTitle}</h1>
-        <EditListingLocationForm
+        <EditEquipmentListingLocationForm
           className={css.form}
           initialValues={this.state.initialValues}
           onSubmit={values => {

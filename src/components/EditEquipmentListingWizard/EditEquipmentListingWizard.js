@@ -13,10 +13,9 @@ import {
   LISTING_PAGE_PARAM_TYPE_NEW,
   LISTING_PAGE_PARAM_TYPES,
 } from '../../util/urlHelpers';
-import { ensureCurrentUser, ensureListing } from '../../util/data';
+import { ensureCurrentUser, ensureEquipmentListing } from '../../util/data';
 
-import { Modal, NamedRedirect, Tabs, StripeConnectAccountStatusBox } from '../../components';
-import { StripeConnectAccountForm } from '../../forms';
+import { NamedRedirect, Tabs } from '../../components';
 
 import EditEquipmentListingWizardTab, {
   AVAILABILITY,
@@ -76,7 +75,7 @@ const tabLabel = (intl, tab) => {
 const tabCompleted = (tab, listing) => {
   const {
     availabilityPlan,
-    general,
+    description,
     geolocation,
     price,
     title,
@@ -86,7 +85,7 @@ const tabCompleted = (tab, listing) => {
 
   switch (tab) {
     case GENERAL:
-      return !!(general && title);
+      return !!(description && title);
     case LOCATION:
       return !!(geolocation && publicData && publicData.location && publicData.location.address);
     case PRICING:
@@ -267,7 +266,7 @@ class EditEquipmentListingWizard extends Component {
     );
     const rootClasses = rootClassName || css.root;
     const classes = classNames(rootClasses, className);
-    const currentListing = ensureListing(listing);
+    const currentListing = ensureEquipmentListing(listing);
     const tabsStatus = tabsActive(isNewListingFlow, currentListing);
 
     // If selectedTab is not active, redirect to the beginning of wizard
@@ -277,7 +276,15 @@ class EditEquipmentListingWizard extends Component {
         .reverse()
         .find(t => tabsStatus[t]);
 
-      return <NamedRedirect name="EditListingPage" params={{ ...params, tab: nearestActiveTab }} />;
+      return (
+        <NamedRedirect
+          name="EditEquipmentListingPage"
+          params={{
+            ...params,
+            tab: nearestActiveTab
+          }}
+        />
+      );
     }
 
     const { width } = viewport;
@@ -297,7 +304,7 @@ class EditEquipmentListingWizard extends Component {
     }
 
     const tabLink = tab => {
-      return { name: 'EditListingPage', params: { ...params, tab } };
+      return { name: 'EditEquipmentListingPage', params: { ...params, tab } };
     };
 
     const formDisabled = getAccountLinkInProgress;
@@ -346,7 +353,7 @@ class EditEquipmentListingWizard extends Component {
 
     // Redirect from success URL to basic path for StripePayoutPage
     if (returnedNormallyFromStripe && stripeConnected && !requirementsMissing) {
-      return <NamedRedirect name="EditListingPage" params={pathParams} />;
+      return <NamedRedirect name="EditEquipmentListingPage" params={pathParams} />;
     }
 
     return (
