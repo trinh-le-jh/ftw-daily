@@ -197,6 +197,7 @@
   "EditListingLocationForm.showListingFailed": "Fetching listing data failed",
   "EditListingLocationForm.updateFailed": "Failed to update listing. Please try again.",
   "EditListingLocationPanel.createListingTitle": "Where's your sauna?",
+  "EditEquipmentListingLocationPanel.createListingTitle": "Where can people pick up your equipment?",
   "EditListingLocationPanel.title": "Edit the location of {listingTitle}",
   "EditListingPage.loadingListingData": "Loading listing data…",
   "EditEquipmentListingPage.loadingListingData": "Loading equipment data…",
