@@ -115,6 +115,10 @@ const TopbarMobileMenu = props => {
         <NamedLink className={css.createNewListingLink} name="NewListingPage">
           <FormattedMessage id="TopbarMobileMenu.newListingLink" />
         </NamedLink>
+        <br/>
+        <NamedLink className={css.createNewListingLink} name="NewEquipmentListingPage">
+          <FormattedMessage id="TopbarMobileMenu.newEquipmentListingLink" />
+        </NamedLink>
       </div>
     </div>
   );

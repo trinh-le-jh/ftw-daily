@@ -1012,6 +1012,7 @@
   "TopbarMobileMenu.loginLink": "Log in",
   "TopbarMobileMenu.logoutLink": "Log out",
   "TopbarMobileMenu.newListingLink": "+ Add your sauna",
+  "TopbarMobileMenu.newEquipmentListingLink": "+ Add your equipment",
   "TopbarMobileMenu.profileSettingsLink": "Profile settings",
   "TopbarMobileMenu.signupLink": "Sign up",
   "TopbarMobileMenu.signupOrLogin": "{signup} or {login}",
