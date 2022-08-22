@@ -99,6 +99,13 @@ const routeConfiguration = () => {
       loadData: pageDataLoadingAPI.EditEquipmentListingPage.loadData,
     },
     {
+      path: '/e/:slug/:id/:type/:tab/:returnURLType',
+      name: 'EditEquipmentListingStripeOnboardingPage',
+      auth: true,
+      component: EditEquipmentListingPage,
+      loadData: pageDataLoadingAPI.EditEquipmentListingPage.loadData,
+    },
+    {
       path: '/l',
       name: 'ListingBasePage',
       component: RedirectToLandingPage,

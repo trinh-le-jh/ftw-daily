@@ -154,7 +154,7 @@ const EditEquipmentListingWizardTab = props => {
     case GENERAL: {
       const submitButtonTranslationKey = isNewListingFlow
         ? 'EditEquipmentListingWizard.saveGeneral'
-        : 'EditListingWizard.saveEditDescription';
+        : 'EditEquipmentListingWizard.saveEditGeneral';
       return (
         <EditEquipmentListingGeneralPanel
           {...panelProps(GENERAL)}
