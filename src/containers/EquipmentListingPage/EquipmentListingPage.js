@@ -43,7 +43,6 @@ import { TopbarContainer, NotFoundPage } from '../../containers';
 
 import { sendEnquiry, fetchTransactionLineItems, setInitialValues } from './EquipmentListingPage.duck';
 import SectionImages from './SectionImages';
-import SectionAvatar from './SectionAvatar';
 import SectionHeading from './SectionHeading';
 import SectionGeneral from './SectionGeneral';
 import SectionReviews from './SectionReviews';
@@ -408,7 +407,6 @@ export class ListingPageComponent extends Component {
                 onManageDisableScrolling={onManageDisableScrolling}
               />
               <div className={css.contentContainer}>
-                <SectionAvatar user={currentAuthor} params={params} />
                 <div className={css.mainContent}>
                   <SectionHeading
                     priceTitle={priceTitle}
@@ -546,7 +544,7 @@ const mapStateToProps = state => {
     fetchLineItemsInProgress,
     fetchLineItemsError,
     enquiryModalOpenForListingId,
-  } = state.ListingPage;
+  } = state.EquipmentListingPage;
   const { currentUser } = state.user;
 
   const getListing = id => {

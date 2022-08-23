@@ -7,7 +7,7 @@
   based on the listing state.
 */
 import React from 'react';
-import { string, oneOfType, node } from 'prop-types';
+import { string, oneOfType, node, bool } from 'prop-types';
 import { richText } from '../../util/richText';
 import { LISTING_STATE_DRAFT, LISTING_STATE_PENDING_APPROVAL, propTypes } from '../../util/types';
 import {
@@ -22,7 +22,7 @@ import css from './ListingLink.module.css';
 const MIN_LENGTH_FOR_LONG_WORDS = 16;
 
 const ListingLink = props => {
-  const { className, listing, children } = props;
+  const { className, listing, children, isEquipment } = props;
   const listingLoaded = listing && listing.id;
   if (!listingLoaded) {
     return null;
@@ -48,7 +48,7 @@ const ListingLink = props => {
     : null;
   const linkProps = !!variant
     ? {
-        name: 'ListingPageVariant',
+        name: isEquipment? 'EquipmentListingPageVariant' : 'ListingPageVariant',
         params: {
           id,
           slug,
@@ -56,7 +56,7 @@ const ListingLink = props => {
         },
       }
     : {
-        name: 'ListingPage',
+        name: isEquipment? 'EquipmentListingPage' : 'ListingPage',
         params: { id, slug },
       };
   return (
@@ -69,12 +69,14 @@ ListingLink.defaultProps = {
   className: null,
   listing: null,
   children: null,
+  isEquipment: false,
 };
 
 ListingLink.propTypes = {
   className: string,
   listing: oneOfType([propTypes.listing, propTypes.ownListing]),
   children: node,
+  isEquipment: bool,
 };
 
 export default ListingLink;

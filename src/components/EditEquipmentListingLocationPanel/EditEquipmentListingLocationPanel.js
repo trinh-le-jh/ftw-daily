@@ -66,7 +66,7 @@ class EditEquipmentListingLocationPanel extends Component {
     const panelTitle = isPublished ? (
       <FormattedMessage
         id="EditListingLocationPanel.title"
-        values={{ listingTitle: <ListingLink listing={listing} /> }}
+        values={{ listingTitle: <ListingLink listing={listing}  isEquipment={true}/> }}
       />
     ) : (
       <FormattedMessage id="EditEquipmentListingLocationPanel.createListingTitle" />

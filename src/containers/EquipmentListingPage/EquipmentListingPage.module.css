@@ -33,19 +33,14 @@
     padding: 0;
   }
 
-  @media (--viewportLarge) {
-    padding: 36px 36px 0 36px;
-  }
 }
 
 /* Firefox doesn't support image aspect ratio inside flexbox */
 .aspectWrapper {
   position: relative; /* allow positioning own listing action bar */
-  padding-bottom: 66.6667%; /* 3:2 Aspect Ratio */
-  background-color: var(--matterColorNegative); /* Loading BG color */
-
-  /* Image carousel can be opened from the image, therefore we should show a pointer */
-  cursor: pointer;
+  max-width: 1128px;
+  margin: auto;
+  padding: 0 36px;
 
   @media (--viewportMedium) {
     padding-bottom: 0; /* No fixed aspect on desktop layouts */
@@ -301,7 +296,7 @@
     flex-direction: column;
     align-items: flex-start;
     flex-shrink: 0;
-    margin: 0 48px 0 0;
+    margin: 0 0 0 48px;
     padding: 0;
   }
 }

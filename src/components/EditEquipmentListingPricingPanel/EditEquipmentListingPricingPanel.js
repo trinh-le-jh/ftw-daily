@@ -4,7 +4,7 @@ import classNames from 'classnames';
 import { FormattedMessage } from '../../util/reactIntl';
 import { LISTING_STATE_DRAFT } from '../../util/types';
 import { ListingLink } from '../../components';
-import { EditListingPricingForm } from '../../forms';
+import { EditEquipmentListingPricingForm } from '../../forms';
 import { ensureOwnListing } from '../../util/data';
 import { types as sdkTypes } from '../../util/sdkLoader';
 import config from '../../config';
@@ -36,7 +36,7 @@ const EditEquipmentListingPricingPanel = props => {
   const panelTitle = isPublished ? (
     <FormattedMessage
       id="EditListingPricingPanel.title"
-      values={{ listingTitle: <ListingLink listing={listing} /> }}
+      values={{ listingTitle: <ListingLink listing={listing} isEquipment={true}/> }}
     />
   ) : (
     <FormattedMessage id="EditListingPricingPanel.createListingTitle" />
@@ -44,7 +44,7 @@ const EditEquipmentListingPricingPanel = props => {
 
   const priceCurrencyValid = price instanceof Money ? price.currency === config.currency : true;
   const form = priceCurrencyValid ? (
-    <EditListingPricingForm
+    <EditEquipmentListingPricingForm
       className={css.form}
       initialValues={{ price }}
       onSubmit={onSubmit}

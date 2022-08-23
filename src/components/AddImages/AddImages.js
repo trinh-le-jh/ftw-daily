@@ -8,7 +8,7 @@
  * </AddImages>
  */
 import React from 'react';
-import PropTypes from 'prop-types';
+import PropTypes, { bool } from 'prop-types';
 import classNames from 'classnames';
 import { ImageFromFile, ResponsiveImage, IconSpinner } from '../../components';
 
@@ -16,7 +16,13 @@ import css from './AddImages.module.css';
 import RemoveImageButton from './RemoveImageButton';
 
 const ThumbnailWrapper = props => {
-  const { className, image, savedImageAltText, onRemoveImage } = props;
+  const {
+    className,
+    image,
+    savedImageAltText,
+    onRemoveImage,
+    isShowRemoveButton,
+  } = props;
   const handleRemoveClick = e => {
     e.stopPropagation();
     onRemoveImage(image.id);
@@ -40,7 +46,7 @@ const ThumbnailWrapper = props => {
         rootClassName={css.thumbnail}
         file={image.file}
       >
-        {removeButton}
+        {isShowRemoveButton && removeButton}
         {uploadingOverlay}
       </ImageFromFile>
     );
@@ -57,7 +63,7 @@ const ThumbnailWrapper = props => {
               variants={['landscape-crop', 'landscape-crop2x']}
             />
           </div>
-          <RemoveImageButton onClick={handleRemoveClick} />
+          {isShowRemoveButton && <RemoveImageButton onClick={handleRemoveClick} />}
         </div>
       </div>
     );
@@ -83,6 +89,7 @@ const AddImages = props => {
     images,
     savedImageAltText,
     onRemoveImage,
+    isShowRemoveButton,
   } = props;
   const classes = classNames(css.root, className);
   return (
@@ -96,6 +103,7 @@ const AddImages = props => {
             className={thumbnailClassName}
             savedImageAltText={savedImageAltText}
             onRemoveImage={onRemoveImage}
+            isShowRemoveButton={isShowRemoveButton}
           />
         );
       })}
@@ -104,7 +112,12 @@ const AddImages = props => {
   );
 };
 
-AddImages.defaultProps = { className: null, thumbnailClassName: null, images: [] };
+AddImages.defaultProps = {
+  className: null,
+  thumbnailClassName: null,
+  images: [],
+  isShowRemoveButton: true,
+};
 
 AddImages.propTypes = {
   images: array,
@@ -113,6 +126,7 @@ AddImages.propTypes = {
   thumbnailClassName: string,
   savedImageAltText: string.isRequired,
   onRemoveImage: func.isRequired,
+  isShowRemoveButton: bool,
 };
 
 export default AddImages;

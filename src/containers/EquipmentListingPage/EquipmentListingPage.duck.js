@@ -56,7 +56,7 @@ const initialState = {
   enquiryModalOpenForListingId: null,
 };
 
-const listingPageReducer = (state = initialState, action = {}) => {
+const equipmentListingPageReducer = (state = initialState, action = {}) => {
   const { type, payload } = action;
   switch (type) {
     case SET_INITIAL_VALUES:
@@ -100,7 +100,7 @@ const listingPageReducer = (state = initialState, action = {}) => {
   }
 };
 
-export default listingPageReducer;
+export default equipmentListingPageReducer;
 
 // ================ Action creators ================ //
 

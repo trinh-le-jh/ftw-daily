@@ -4,6 +4,7 @@ import { ResponsiveImage, Modal, ImageCarousel } from '../../components';
 import ActionBarMaybe from './ActionBarMaybe';
 
 import css from './EquipmentListingPage.module.css';
+import ImageSlider from './ImageSlider';
 
 const SectionImages = props => {
   const {
@@ -42,18 +43,7 @@ const SectionImages = props => {
       <div className={css.threeToTwoWrapper}>
         <div className={css.aspectWrapper} onClick={handleViewPhotosClick}>
           {actionBar}
-          <ResponsiveImage
-            rootClassName={css.rootForImage}
-            alt={title}
-            image={firstImage}
-            variants={[
-              'landscape-crop',
-              'landscape-crop2x',
-              'landscape-crop4x',
-              'landscape-crop6x',
-            ]}
-          />
-          {viewPhotosButton}
+          <ImageSlider images={listing.images}/>
         </div>
       </div>
       <Modal

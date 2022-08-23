@@ -3,7 +3,7 @@ import { array, bool, func, object, string } from 'prop-types';
 import { FormattedMessage } from '../../util/reactIntl';
 import classNames from 'classnames';
 import { LISTING_STATE_DRAFT } from '../../util/types';
-import { EditListingPhotosForm } from '../../forms';
+import { EditEquipmentListingPhotosForm } from '../../forms';
 import { ensureOwnListing } from '../../util/data';
 import { ListingLink } from '../../components';
 
@@ -27,6 +27,7 @@ class EditEquipmentListingPhotosPanel extends Component {
       onChange,
       onSubmit,
       onRemoveImage,
+      mainPhotoUuid,
     } = this.props;
 
     const rootClass = rootClassName || css.root;
@@ -38,7 +39,7 @@ class EditEquipmentListingPhotosPanel extends Component {
     const panelTitle = isPublished ? (
       <FormattedMessage
         id="EditListingPhotosPanel.title"
-        values={{ listingTitle: <ListingLink listing={listing} /> }}
+        values={{ listingTitle: <ListingLink listing={listing} isEquipment={true}/> }}
       />
     ) : (
       <FormattedMessage id="EditListingPhotosPanel.createListingTitle" />
@@ -47,7 +48,7 @@ class EditEquipmentListingPhotosPanel extends Component {
     return (
       <div className={classes}>
         <h1 className={css.title}>{panelTitle}</h1>
-        <EditListingPhotosForm
+        <EditEquipmentListingPhotosForm
           className={css.form}
           disabled={disabled}
           ready={ready}
@@ -65,6 +66,7 @@ class EditEquipmentListingPhotosPanel extends Component {
           saveActionMsg={submitButtonText}
           updated={panelUpdated}
           updateInProgress={updateInProgress}
+          mainPhotoUuid={mainPhotoUuid}
         />
       </div>
     );
@@ -98,6 +100,7 @@ EditEquipmentListingPhotosPanel.propTypes = {
   panelUpdated: bool.isRequired,
   updateInProgress: bool.isRequired,
   onRemoveImage: func.isRequired,
+  mainPhotoUuid: string,
 };
 
 export default EditEquipmentListingPhotosPanel;

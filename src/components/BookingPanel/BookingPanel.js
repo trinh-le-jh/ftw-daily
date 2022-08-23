@@ -96,7 +96,7 @@ const BookingPanel = props => {
 
   const classes = classNames(rootClassName || css.root, className);
   const titleClasses = classNames(titleClassName || css.bookingTitle);
-
+  console.log(timeSlots);
   return (
     <div className={classes}>
       <ModalInMobile

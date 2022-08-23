@@ -19,6 +19,7 @@ import ProfileSettingsPage from './ProfileSettingsPage/ProfileSettingsPage.duck'
 import SearchPage from './SearchPage/SearchPage.duck';
 import StripePayoutPage from './StripePayoutPage/StripePayoutPage.duck';
 import TransactionPage from './TransactionPage/TransactionPage.duck';
+import EquipmentListingPage from './EquipmentListingPage/EquipmentListingPage.duck';
 
 export {
   CheckoutPage,
@@ -27,6 +28,7 @@ export {
   InboxPage,
   ListingPage,
   EditEquipmentListingPage,
+  EquipmentListingPage,
   ManageListingsPage,
   PasswordChangePage,
   PasswordRecoveryPage,

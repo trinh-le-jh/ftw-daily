@@ -5,7 +5,7 @@ import { FormattedMessage } from '../../util/reactIntl';
 import { ensureOwnListing } from '../../util/data';
 import { LISTING_STATE_DRAFT } from '../../util/types';
 import { ListingLink } from '../../components';
-import { EditListingAvailabilityForm } from '../../forms';
+import { EditEquipmentListingAvailabilityForm } from '../../forms';
 
 import css from './EditEquipmentListingAvailabilityPanel.module.css';
 
@@ -48,13 +48,13 @@ const EditEquipmentListingAvailabilityPanel = props => {
         {isPublished ? (
           <FormattedMessage
             id="EditListingAvailabilityPanel.title"
-            values={{ listingTitle: <ListingLink listing={listing} /> }}
+            values={{ listingTitle: <ListingLink listing={listing} isEquipment={true}/> }}
           />
         ) : (
           <FormattedMessage id="EditListingAvailabilityPanel.createListingTitle" />
         )}
       </h1>
-      <EditListingAvailabilityForm
+      <EditEquipmentListingAvailabilityForm
         className={css.form}
         listingId={currentListing.id}
         initialValues={{ availabilityPlan }}
