@@ -264,18 +264,6 @@ class TopbarComponent extends Component {
             </p>
           </div>
         </Modal>
-        <ModalMissingInformation
-          id="MissingInformationReminder"
-          containerClassName={css.missingInformationModal}
-          currentUser={currentUser}
-          currentUserHasListings={currentUserHasListings}
-          currentUserHasOrders={currentUserHasOrders}
-          location={location}
-          onManageDisableScrolling={onManageDisableScrolling}
-          onResendVerificationEmail={onResendVerificationEmail}
-          sendVerificationEmailInProgress={sendVerificationEmailInProgress}
-          sendVerificationEmailError={sendVerificationEmailError}
-        />
 
         <GenericError show={showGenericError} />
       </div>

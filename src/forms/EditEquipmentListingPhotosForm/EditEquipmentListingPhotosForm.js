@@ -70,18 +70,35 @@ export class EditListingPhotosFormComponent extends Component {
             mainPhotoUuid && images.length
               ? images.filter((img) => img.id.uuid == currentMainPhotoUuid)
               : []
-          )
+          );
 
           const [ subImage, setSubImage ] = useState(
             images
               ? images.filter((img) => img.id.uuid !== currentMainPhotoUuid)
               : []
-          )
+          );
 
           const [ isUploadMainPhoto, setIsUploadMainPhoto ] = useState(false)
 
           useEffect(() => {
             const lastImage = images[images.length -1];
+
+            if (isUploadMainPhoto && !lastImage.imageId ) {
+              setMainImage(
+                images.filter((img, idx) =>
+                  idx === images.length -1
+                )
+              );
+              if (images.length !== 1) {
+                setSubImage(
+                  images.filter((img, idx) =>
+                    idx !== images.length -1
+                  )
+                );
+              }
+              return;
+            }
+
             if (isUploadMainPhoto && lastImage.imageId && lastImage.imageId.uuid ) {
               const newMainPhotoUuid = lastImage.imageId.uuid;
 
@@ -98,9 +115,15 @@ export class EditListingPhotosFormComponent extends Component {
               );
 
               setCurrentMainPhotoUuid(newMainPhotoUuid);
-
               setIsUploadMainPhoto(false);
+              return;
             }
+
+            setSubImage(
+              images.filter((img) =>
+                !img.imageId || img.imageId.uuid !== currentMainPhotoUuid
+              )
+            );
 
           }, [ images ])
 
@@ -165,7 +188,7 @@ export class EditListingPhotosFormComponent extends Component {
           const submitReady = (updated && pristineSinceLastSubmit) || ready;
           const submitInProgress = updateInProgress;
           const submitDisabled =
-            invalid || disabled || submitInProgress || imageUploadRequested || ready;
+            invalid || disabled || submitInProgress || imageUploadRequested || ready || !mainImage.length;
 
           const classes = classNames(css.root, className);
 
