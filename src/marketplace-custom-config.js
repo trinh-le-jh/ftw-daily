@@ -77,7 +77,7 @@ export const filters = [
     id: 'manufactureYear',
     label: 'ManufactureYear',
     type: 'ManufactureYearFilter',
-    group: 'primary',
+    group: 'secondary',
     queryParamNames: ['manufactureYear'],
     config: {},
   },
@@ -153,7 +153,7 @@ export const filters = [
   },
   {
     id: 'equipment',
-    label: 'Equipment Type',
+    label: 'Equipment Type Filter',
     type: 'SelectMultipleFilter',
     group: 'secondary',
     queryParamNames: ['pub_equipmentType'],
