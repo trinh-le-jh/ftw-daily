@@ -5,7 +5,12 @@ import { Form as FinalForm } from 'react-final-form';
 import { intlShape, injectIntl, FormattedMessage } from '../../util/reactIntl';
 import classNames from 'classnames';
 import { propTypes } from '../../util/types';
-import { maxLength, required, composeValidators } from '../../util/validators';
+import {
+  maxLength,
+  required,
+  composeValidators,
+  manufactureYearValid, numberHourValid,
+} from '../../util/validators';
 import { Form, Button, FieldTextInput, FieldCheckboxGroup } from '../../components';
 
 import css from './EditEquipmentListingGeneralForm.module.css';
@@ -14,6 +19,8 @@ import { findOptionsForSelectFilter } from '../../util/search';
 import arrayMutators from 'final-form-arrays';
 
 const TITLE_MAX_LENGTH = 60;
+const MANUFACTURE_FIELD = 'manufactureYear'
+const NUMBER_HOUR_FIELD = 'numberHour'
 
 const EditEquipmentListingGeneralFormComponent = props => (
   <FinalForm
@@ -49,9 +56,7 @@ const EditEquipmentListingGeneralFormComponent = props => (
       });
       const maxLengthMessage = intl.formatMessage(
         { id: 'EditEquipmentListingGeneralForm.maxLength' },
-        {
-          maxLength: TITLE_MAX_LENGTH,
-        }
+        { maxLength: TITLE_MAX_LENGTH }
       );
 
       const descriptionMessage = intl.formatMessage({
@@ -77,6 +82,14 @@ const EditEquipmentListingGeneralFormComponent = props => (
       });
       const manufactureYearPlaceholderMessage = intl.formatMessage({
         id: 'EditEquipmentListingGeneralForm.manufacturePlaceholder',
+      });
+
+      const manufactureYearErrorMessage = intl.formatMessage({
+        id: 'EditEquipmentListingGeneralForm.manufactureYearErrorMessage',
+      });
+
+      const numberHourErrorMessage = intl.formatMessage({
+        id: 'EditEquipmentListingGeneralForm.numberHourErrorMessage',
       });
 
       const {
@@ -109,14 +122,28 @@ const EditEquipmentListingGeneralFormComponent = props => (
       const submitDisabled = invalid || disabled || submitInProgress;
 
       const options = findOptionsForSelectFilter('equipment', filterConfig);
-      const handleManufactureOnChange = event => {
+
+      const validateManufactureYear = value => {
+        return composeValidators
+          (manufactureYearValid(manufactureYearErrorMessage))
+          (Number(value))
+      }
+
+      const validateNumberHour = value => {
+        return composeValidators
+          (numberHourValid(numberHourErrorMessage))
+          (Number(value))
+      }
+
+      const handleNumberFieldOnChange = (fieldName, event) => {
         const value = event.target.value;
         formRenderProps.form.change(
-          'manufacture',
+          fieldName,
           // Remove any character not numeric character
           value.replace(/[^\d]/g, '')
         );
       };
+
       return (
         <Form className={classes} onSubmit={handleSubmit}>
           {errorMessageCreateListingDraft}
@@ -149,29 +176,34 @@ const EditEquipmentListingGeneralFormComponent = props => (
           <div className={css.fieldContainer}>
             <label htmlFor="equipmentType">{equipmentTypeLabel}</label>
             <FieldCheckboxGroup
-              id="type"
-              name="type"
+              id="equipmentType"
+              name="equipmentType"
               options={options}
             />
           </div>
           {/*Equipment manufacture*/}
           <FieldTextInput
-            id="manufacture"
-            name="manufacture"
+            id={MANUFACTURE_FIELD}
+            name={MANUFACTURE_FIELD}
             type="textarea"
             className={css.fieldContainer}
+            maxLength={4}
             label={manufactureYearLabelMessage}
             placeholder={manufactureYearPlaceholderMessage}
-            onChange={event => handleManufactureOnChange(event)}
+            onChange={event => handleNumberFieldOnChange(MANUFACTURE_FIELD, event)}
+            validate={validateManufactureYear}
           />
-          {/*Equipment rules*/}
+          {/*Equipment using time rules*/}
           <FieldTextInput
-            id="rules"
-            name="rules"
+            id={NUMBER_HOUR_FIELD}
+            name={NUMBER_HOUR_FIELD}
             className={css.fieldContainer}
             type="textarea"
             label={rulesLabelMessage}
             placeholder={rulesPlaceholderMessage}
+            onChange={event => handleNumberFieldOnChange(NUMBER_HOUR_FIELD, event)}
+            validate={validateNumberHour}
+            maxLength={2}
           />
 
           <Button

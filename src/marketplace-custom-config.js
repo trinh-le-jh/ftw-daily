@@ -145,10 +145,10 @@ export const filters = [
   },
   {
     id: 'equipment',
-    label: 'Equipment',
+    label: 'Equipment Type',
     type: 'SelectMultipleFilter',
     group: 'secondary',
-    queryParamNames: ['pub_equipment'],
+    queryParamNames: ['pub_equipmentType'],
     config: {
       // Optional modes: 'has_all', 'has_any'
       // https://www.sharetribe.com/api-reference/marketplace.html#extended-data-filtering
