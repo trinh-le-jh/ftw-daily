@@ -74,6 +74,14 @@ export const filters = [
     config: {},
   },
   {
+    id: 'manufactureYear',
+    label: 'ManufactureYear',
+    type: 'ManufactureYearFilter',
+    group: 'primary',
+    queryParamNames: ['manufactureYear'],
+    config: {},
+  },
+  {
     id: 'category',
     label: 'Category',
     type: 'SelectSingleFilter',
