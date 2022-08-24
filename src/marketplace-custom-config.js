@@ -76,8 +76,8 @@ export const filters = [
   {
     id: 'manufactureYear',
     label: 'ManufactureYear',
-    type: 'ManufactureYearFilter',
-    group: 'secondary',
+    type: 'NumberFilter',
+    group: 'primary',
     queryParamNames: ['manufactureYear'],
     config: {},
   },
@@ -156,7 +156,7 @@ export const filters = [
     label: 'Equipment Type Filter',
     type: 'SelectMultipleFilter',
     group: 'secondary',
-    queryParamNames: ['pub_equipmentType'],
+    queryParamNames: [ 'pub_equipmentType' ],
     config: {
       // Optional modes: 'has_all', 'has_any'
       // https://www.sharetribe.com/api-reference/marketplace.html#extended-data-filtering

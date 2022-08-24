@@ -44,6 +44,7 @@ const FilterFormComponent = props => {
           paddingClasses,
           intl,
           children,
+          isNumber,
         } = formRenderProps;
 
         const handleCancel = () => {
@@ -58,12 +59,23 @@ const FilterFormComponent = props => {
 
         const classes = classNames(css.root);
 
+        const handleOnChange = (event) => {
+          if (!isNumber) return;
+          const value = event.target.value;
+          formRenderProps.form.change(
+            id,
+            // Remove any character not numeric character
+            value.replace(/[^\d]/g, '')
+          );
+        };
+
         return (
           <Form
             id={id}
             className={classes}
             onSubmit={handleSubmit}
             tabIndex="0"
+            onChange={handleOnChange}
             style={{ ...style }}
           >
             <div className={classNames(paddingClasses || css.contentWrapper)}>{children}</div>
@@ -110,6 +122,8 @@ FilterFormComponent.propTypes = {
 
   // form injectIntl
   intl: intlShape.isRequired,
+
+  isNumber: bool,
 };
 
 const FilterForm = injectIntl(FilterFormComponent);
