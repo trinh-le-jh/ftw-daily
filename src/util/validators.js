@@ -71,18 +71,6 @@ export const nonEmptyArray = message => value => {
   return value && Array.isArray(value) && value.length > 0 ? VALID : message;
 };
 
-export const manufactureYearValid = message => value => {
-  return !value || ( typeof value === 'number' && new Date().getFullYear() >= value )
-    ? VALID
-    : message;
-}
-
-export const numberHourValid = message => value => {
-  return !value || ( typeof value === 'number' && value > 0 && value < 25 )
-    ? VALID
-    : message;
-}
-
 export const autocompleteSearchRequired = message => value => {
   return value && value.search ? VALID : message;
 };
