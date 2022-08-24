@@ -213,6 +213,8 @@ const EditEquipmentListingWizardTab = props => {
         ? 'EditListingWizard.saveNewPhotos'
         : 'EditListingWizard.saveEditPhotos';
 
+      const mainPhotoUuid = listing.attributes.publicData.mainPhotoUuid
+
       return (
         <EditEquipmentListingPhotosPanel
           {...panelProps(PHOTOS)}
@@ -220,8 +222,15 @@ const EditEquipmentListingWizardTab = props => {
           images={images}
           onImageUpload={onImageUpload}
           onRemoveImage={onRemoveImage}
+          mainPhotoUuid={mainPhotoUuid}
           onSubmit={values => {
-            onCompleteEditEquipmentListingWizardTab(tab, values);
+            const updateData = {
+              images: values.images,
+              publicData: {
+                mainPhotoUuid: values.mainPhotoUuid,
+              },
+            }
+            onCompleteEditEquipmentListingWizardTab(tab, updateData);
           }}
           onUpdateImageOrder={onUpdateImageOrder}
         />

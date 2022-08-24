@@ -109,7 +109,14 @@ const EditEquipmentListingGeneralFormComponent = props => (
       const submitDisabled = invalid || disabled || submitInProgress;
 
       const options = findOptionsForSelectFilter('equipment', filterConfig);
-
+      const handleManufactureOnChange = event => {
+        const value = event.target.value;
+        formRenderProps.form.change(
+          'manufacture',
+          // Remove any character not numeric character
+          value.replace(/[^\d]/g, '')
+        );
+      };
       return (
         <Form className={classes} onSubmit={handleSubmit}>
           {errorMessageCreateListingDraft}
@@ -151,11 +158,11 @@ const EditEquipmentListingGeneralFormComponent = props => (
           <FieldTextInput
             id="manufacture"
             name="manufacture"
+            type="textarea"
             className={css.fieldContainer}
-            inputRootClass={css.inputNumber}
-            type="number"
             label={manufactureYearLabelMessage}
             placeholder={manufactureYearPlaceholderMessage}
+            onChange={event => handleManufactureOnChange(event)}
           />
           {/*Equipment rules*/}
           <FieldTextInput
