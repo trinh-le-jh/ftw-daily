@@ -121,8 +121,11 @@ class NumberFilter extends Component {
 
     const handleSubmit = values => {
       let usedValue = values ? values[name] : values;
-      if (name === 'numberhour') {
+      if (name === 'numberhour' && usedValue.length) {
         usedValue = `0,${usedValue}`
+      }
+      if(!usedValue.length) {
+        usedValue = undefined;
       }
       onSubmit({ [urlParam]: usedValue });
     };
@@ -217,6 +220,7 @@ class NumberFilter extends Component {
         label={labelForPlain}
         isSelected={hasInitialValues}
         id={`${id}.plain`}
+        label={label}
         inputName={name}
         isNumber
         liveEdit
