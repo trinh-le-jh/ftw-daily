@@ -9,7 +9,8 @@ import {
   maxLength,
   required,
   composeValidators,
-  manufactureYearValid, numberHourValid,
+  validateYear,
+  validateHour,
 } from '../../util/validators';
 import { Form, Button, FieldTextInput, FieldCheckboxGroup } from '../../components';
 
@@ -84,11 +85,11 @@ const EditEquipmentListingGeneralFormComponent = props => (
         id: 'EditEquipmentListingGeneralForm.manufacturePlaceholder',
       });
 
-      const manufactureYearErrorMessage = intl.formatMessage({
+      const yearErrorMessage = intl.formatMessage({
         id: 'EditEquipmentListingGeneralForm.manufactureYearErrorMessage',
       });
 
-      const numberHourErrorMessage = intl.formatMessage({
+      const hourErrorMessage = intl.formatMessage({
         id: 'EditEquipmentListingGeneralForm.numberHourErrorMessage',
       });
 
@@ -123,16 +124,12 @@ const EditEquipmentListingGeneralFormComponent = props => (
 
       const options = findOptionsForSelectFilter('equipment', filterConfig);
 
-      const validateManufactureYear = value => {
-        return composeValidators
-          (manufactureYearValid(manufactureYearErrorMessage))
-          (Number(value))
+      const callManufactureValidate = (value) => {
+        return validateYear(yearErrorMessage, value)
       }
 
-      const validateNumberHour = value => {
-        return composeValidators
-          (numberHourValid(numberHourErrorMessage))
-          (Number(value))
+      const callHourValidate = (value) => {
+        return validateHour(hourErrorMessage, value)
       }
 
       const handleNumberFieldOnChange = (fieldName, event) => {
@@ -191,7 +188,7 @@ const EditEquipmentListingGeneralFormComponent = props => (
             label={manufactureYearLabelMessage}
             placeholder={manufactureYearPlaceholderMessage}
             onChange={event => handleNumberFieldOnChange(MANUFACTURE_FIELD, event)}
-            validate={validateManufactureYear}
+            validate={(value) => callManufactureValidate(value)}
           />
           {/*Equipment using time rules*/}
           <FieldTextInput
@@ -202,7 +199,7 @@ const EditEquipmentListingGeneralFormComponent = props => (
             label={rulesLabelMessage}
             placeholder={rulesPlaceholderMessage}
             onChange={event => handleNumberFieldOnChange(NUMBER_HOUR_FIELD, event)}
-            validate={validateNumberHour}
+            validate={(value) => callHourValidate(value)}
             maxLength={2}
           />
 

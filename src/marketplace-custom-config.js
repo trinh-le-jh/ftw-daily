@@ -74,14 +74,6 @@ export const filters = [
     config: {},
   },
   {
-    id: 'manufactureYear',
-    label: 'ManufactureYear',
-    type: 'NumberFilter',
-    group: 'primary',
-    queryParamNames: ['manufactureYear'],
-    config: {},
-  },
-  {
     id: 'category',
     label: 'Category',
     type: 'SelectSingleFilter',
@@ -180,6 +172,28 @@ export const filters = [
           label: 'Chemistry',
         },
       ],
+    },
+  },
+  {
+    id: 'manufactureYear',
+    label: 'Equipment Manufacture Year',
+    type: 'NumberFilter',
+    group: 'primary',
+    queryParamNames: ['pub_manufactureYear'],
+    config: {
+      maxLength: 4,
+      type: 'year'
+    },
+  },
+  {
+    id: 'numberHour',
+    label: 'Max using hour a day',
+    type: 'NumberFilter',
+    group: 'primary',
+    queryParamNames: ['pub_numberHour'],
+    config: {
+      maxLength: 2,
+      type: 'hour'
     },
   },
 ];

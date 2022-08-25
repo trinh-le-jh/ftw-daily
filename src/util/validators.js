@@ -71,13 +71,13 @@ export const nonEmptyArray = message => value => {
   return value && Array.isArray(value) && value.length > 0 ? VALID : message;
 };
 
-export const manufactureYearValid = message => value => {
+export const yearNumberByNowValid = message => value => {
   return !value || ( typeof value === 'number' && new Date().getFullYear() >= value )
     ? VALID
     : message;
 }
 
-export const numberHourValid = message => value => {
+export const hourNumberValid = message => value => {
   return !value || ( typeof value === 'number' && value > 0 && value < 25 )
     ? VALID
     : message;
@@ -234,6 +234,18 @@ export const validHKID = message => value => {
 export const validSGID = message => value => {
   return value.length === 9 ? VALID : message;
 };
+
+export const validateYear = (errorMessage, value) => {
+  return composeValidators
+  (yearNumberByNowValid(errorMessage))
+  (Number(value))
+}
+
+export const validateHour = (errorMessage, value) => {
+  return composeValidators
+  (hourNumberValid(errorMessage))
+  (Number(value))
+}
 
 export const composeValidators = (...validators) => value =>
   validators.reduce((error, validator) => error || validator(value), VALID);

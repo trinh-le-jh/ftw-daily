@@ -105,9 +105,7 @@ const FilterComponent = props => {
           queryParamNames={queryParamNames}
           initialValues={initialValues(queryParamNames)}
           onSubmit={getHandleChangedValueFn(useHistoryPush)}
-          filterText={'text'}
-          filterPlaceHolder={'text'}
-          {...config}
+          inputConfig={config}
           {...rest}
         />
       );

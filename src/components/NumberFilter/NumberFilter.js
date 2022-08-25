@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { arrayOf, func, number, shape, string } from 'prop-types';
+import { arrayOf, func, number, object, shape, string } from 'prop-types';
 import classNames from 'classnames';
 import { injectIntl, intlShape } from '../../util/reactIntl';
 import debounce from 'lodash/debounce';
@@ -7,6 +7,7 @@ import { FieldTextInput } from '../../components';
 
 import { FilterPopup, FilterPlain } from '../../components';
 import css from './NumberFilter.module.css';
+import { validateYear, validateHour } from '../../util/validators';
 
 // When user types, we wait for new keystrokes a while before searching new content
 const DEBOUNCE_WAIT_TIME = 600;
@@ -68,13 +69,13 @@ class NumberFilter extends Component {
       name,
       label,
       initialValues,
-      filterText,
-      filterPlaceHolder,
       contentPlacementOffset,
       onSubmit,
       queryParamNames,
       intl,
       showAsPopup,
+      config,
+      inputConfig,
       ...rest
     } = this.props;
 
@@ -83,28 +84,46 @@ class NumberFilter extends Component {
     const urlParam = getKeywordQueryParam(queryParamNames);
     const hasInitialValues =
       !!initialValues && !!initialValues[urlParam] && initialValues[urlParam].length > 0;
+    let initValue = '';
+    if (hasInitialValues && inputConfig && inputConfig.type === 'year') {
+      initValue = 'Year: ' + initialValues[urlParam]
+    }
+    if (hasInitialValues && inputConfig && inputConfig.type === 'hour') {
+      initValue = 'Hour: ' + initialValues[urlParam].replace('0,', '')
+    }
     const labelForPopup = hasInitialValues
       ? intl.formatMessage(
         { id: 'NumberFilter.labelSelected' },
-        { labelText: initialValues[urlParam] }
+        { labelText: initValue }
       )
       : label;
 
     const labelForPlain = hasInitialValues
       ? intl.formatMessage(
         { id: 'NumberFilterPlainForm.labelSelected' },
-        { labelText: initialValues[urlParam] }
+        { labelText: initValue }
       )
       : label;
+
+    const filterText = intl.formatMessage({ id: 'NumberFilter.filterText' });
+
+    const placeholder = intl.formatMessage({ id: 'NumberFilter.placeholder' });
 
     const contentStyle = this.positionStyleForContent();
 
     // pass the initial values with the name key so that
     // they can be passed to the correct field
-    const namedInitialValues = { [name]: initialValues[urlParam] };
+    const namedInitialValues = {
+      [name]: hasInitialValues
+        ? initialValues[urlParam].replace('0,', '')
+        : ''
+    };
 
     const handleSubmit = values => {
-      const usedValue = values ? values[name] : values;
+      let usedValue = values ? values[name] : values;
+      if (name === 'numberhour') {
+        usedValue = `0,${usedValue}`
+      }
       onSubmit({ [urlParam]: usedValue });
     };
 
@@ -116,7 +135,6 @@ class NumberFilter extends Component {
     const handleChangeWithDebounce = values => {
       // handleSubmit gets values as params.
       // If this field ("keyword") is short, create timeout
-      console.log(values);
       const hasKeywordValue = values && values[name];
       const keywordValue = hasKeywordValue ? values && values[name] : '';
       if (!hasKeywordValue || (hasKeywordValue && keywordValue.length >= 3)) {
@@ -141,14 +159,25 @@ class NumberFilter extends Component {
       }
     };
 
-    const handleOnchange = (fieldName, event) => {
-      const value = event.target.value;
-      formRenderProps.form.change(
-        fieldName,
-        // Remove any character not numeric character
-        value.replace(/[^\d]/g, '')
-      );
-    };
+    const yearErrorMessage = intl.formatMessage({
+      id: 'EditEquipmentListingGeneralForm.manufactureYearErrorMessage',
+    });
+
+    const hourErrorMessage = intl.formatMessage({
+      id: 'EditEquipmentListingGeneralForm.numberHourErrorMessage',
+    });
+
+    let validationFunction = () => undefined;
+    if (inputConfig.type === 'year') {
+      validationFunction = (value) => {
+        return validateYear(yearErrorMessage, value);
+      }
+    }
+    if (inputConfig.type === 'hour') {
+      validationFunction = (value) => {
+        return validateHour(hourErrorMessage, value);
+      }
+    }
 
     return showAsPopup ? (
       <FilterPopup
@@ -159,6 +188,7 @@ class NumberFilter extends Component {
         label={labelForPopup}
         isSelected={hasInitialValues}
         id={`${id}.popup`}
+        inputName={name}
         showAsPopup
         labelMaxWidth={250}
         contentPlacementOffset={contentPlacementOffset}
@@ -173,9 +203,11 @@ class NumberFilter extends Component {
           name={name}
           id={`${id}-input`}
           type="text"
+          maxLength={inputConfig.maxLength}
           label={filterText}
-          placeholder={filterPlaceHolder}
+          placeholder={placeholder}
           autoComplete="off"
+          validate={(values) => validationFunction(values)}
         />
       </FilterPopup>
     ) : (
@@ -185,6 +217,8 @@ class NumberFilter extends Component {
         label={labelForPlain}
         isSelected={hasInitialValues}
         id={`${id}.plain`}
+        inputName={name}
+        isNumber
         liveEdit
         contentPlacementOffset={contentStyle}
         onSubmit={handleChangeWithDebounce}
@@ -197,11 +231,12 @@ class NumberFilter extends Component {
           <FieldTextInput
             name={name}
             id={`${id}-input`}
-            isUncontrolled
+            maxLength={inputConfig.maxLength}
             inputRef={this.mobileInputRef}
             type="text"
             placeholder={placeholder}
             autoComplete="off"
+            validate={(values) => validationFunction(values)}
           />
         </fieldset>
       </FilterPlain>
@@ -231,8 +266,7 @@ NumberFilter.propTypes = {
 
   // form injectIntl
   intl: intlShape.isRequired,
-  filterText: string.isRequired,
-  filterPlaceHolder: string.isRequired,
+  inputConfig: object,
 };
 
 export default injectIntl(NumberFilter);

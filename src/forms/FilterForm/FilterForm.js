@@ -1,5 +1,5 @@
 import React from 'react';
-import { bool, func, node, object } from 'prop-types';
+import { bool, func, node, object, string } from 'prop-types';
 import classNames from 'classnames';
 import { Form as FinalForm, FormSpy } from 'react-final-form';
 import arrayMutators from 'final-form-arrays';
@@ -45,6 +45,7 @@ const FilterFormComponent = props => {
           intl,
           children,
           isNumber,
+          inputName,
         } = formRenderProps;
 
         const handleCancel = () => {
@@ -60,10 +61,10 @@ const FilterFormComponent = props => {
         const classes = classNames(css.root);
 
         const handleOnChange = (event) => {
-          if (!isNumber) return;
+          if ( !isNumber || !inputName ) return;
           const value = event.target.value;
-          formRenderProps.form.change(
-            id,
+          form.change(
+            inputName,
             // Remove any character not numeric character
             value.replace(/[^\d]/g, '')
           );
@@ -124,6 +125,7 @@ FilterFormComponent.propTypes = {
   intl: intlShape.isRequired,
 
   isNumber: bool,
+  inputName: string,
 };
 
 const FilterForm = injectIntl(FilterFormComponent);
