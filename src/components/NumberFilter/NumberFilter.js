@@ -7,7 +7,7 @@ import { FieldTextInput } from '../../components';
 
 import { FilterPopup, FilterPlain } from '../../components';
 import css from './NumberFilter.module.css';
-import { validateYear, validateHour } from '../../util/validators';
+import { validateHour, composeValidators, yearNumberByNowValid, hourNumberValid } from '../../util/validators';
 
 // When user types, we wait for new keystrokes a while before searching new content
 const DEBOUNCE_WAIT_TIME = 600;
@@ -121,10 +121,10 @@ class NumberFilter extends Component {
 
     const handleSubmit = values => {
       let usedValue = values ? values[name] : values;
-      if (name === 'numberhour' && usedValue.length) {
+      if (name === 'numberhour' && usedValue && usedValue.length) {
         usedValue = `0,${usedValue}`
       }
-      if(!usedValue.length) {
+      if (!usedValue || !usedValue.length) {
         usedValue = undefined;
       }
       onSubmit({ [urlParam]: usedValue });
@@ -172,14 +172,10 @@ class NumberFilter extends Component {
 
     let validationFunction = () => undefined;
     if (inputConfig.type === 'year') {
-      validationFunction = (value) => {
-        return validateYear(yearErrorMessage, value);
-      }
+      validationFunction = composeValidators(yearNumberByNowValid(yearErrorMessage))
     }
     if (inputConfig.type === 'hour') {
-      validationFunction = (value) => {
-        return validateHour(hourErrorMessage, value);
-      }
+      validationFunction = composeValidators(hourNumberValid(hourErrorMessage))
     }
 
     return showAsPopup ? (

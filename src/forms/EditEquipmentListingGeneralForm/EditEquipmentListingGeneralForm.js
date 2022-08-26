@@ -9,8 +9,8 @@ import {
   maxLength,
   required,
   composeValidators,
-  validateYear,
-  validateHour,
+  yearNumberByNowValid,
+  hourNumberValid,
 } from '../../util/validators';
 import { Form, Button, FieldTextInput, FieldCheckboxGroup } from '../../components';
 
@@ -124,14 +124,6 @@ const EditEquipmentListingGeneralFormComponent = props => (
 
       const options = findOptionsForSelectFilter('equipment', filterConfig);
 
-      const callManufactureValidate = (value) => {
-        return validateYear(yearErrorMessage, value)
-      }
-
-      const callHourValidate = (value) => {
-        return validateHour(hourErrorMessage, value)
-      }
-
       const handleNumberFieldOnChange = (fieldName, event) => {
         const value = event.target.value;
         formRenderProps.form.change(
@@ -188,7 +180,7 @@ const EditEquipmentListingGeneralFormComponent = props => (
             label={manufactureYearLabelMessage}
             placeholder={manufactureYearPlaceholderMessage}
             onChange={event => handleNumberFieldOnChange(MANUFACTURE_FIELD, event)}
-            validate={(value) => callManufactureValidate(value)}
+            validate={composeValidators(yearNumberByNowValid(yearErrorMessage))}
           />
           {/*Equipment using time rules*/}
           <FieldTextInput
@@ -199,7 +191,7 @@ const EditEquipmentListingGeneralFormComponent = props => (
             label={rulesLabelMessage}
             placeholder={rulesPlaceholderMessage}
             onChange={event => handleNumberFieldOnChange(NUMBER_HOUR_FIELD, event)}
-            validate={(value) => callHourValidate(value)}
+            validate={composeValidators(hourNumberValid(hourErrorMessage))}
             maxLength={2}
           />
 
