@@ -174,6 +174,10 @@ export const ManageListingCardComponent = props => {
     ? 'ManageListingCard.perDay'
     : 'ManageListingCard.perUnit';
 
+  const productPage = listing.attributes.publicData.isEquipment
+    ? 'EditEquipmentListingPage'
+    : 'EditListingPage';
+
   return (
     <div className={classes}>
       <div
@@ -258,7 +262,7 @@ export const ManageListingCardComponent = props => {
             >
               <NamedLink
                 className={css.finishListingDraftLink}
-                name="EditListingPage"
+                name={productPage}
                 params={{ id, slug, type: LISTING_PAGE_PARAM_TYPE_DRAFT, tab: 'photos' }}
               >
                 <FormattedMessage id="ManageListingCard.finishListingDraft" />
@@ -341,7 +345,7 @@ export const ManageListingCardComponent = props => {
         <div className={css.manageLinks}>
           <NamedLink
             className={css.manageLink}
-            name="EditListingPage"
+            name={productPage}
             params={{ id, slug, type: editListingLinkType, tab: 'description' }}
           >
             <FormattedMessage id="ManageListingCard.editListing" />
