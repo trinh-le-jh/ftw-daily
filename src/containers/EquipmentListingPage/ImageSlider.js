@@ -5,7 +5,7 @@ import css from './EquipmentListingPage.module.css';
 
 const ImageSlider = ({images}) => {
   const listImage = images.map((image) => {
-    const variant = image.attributes.variants['scaled-xlarge'];
+    const variant = image.attributes.variants['landscape-crop'];
     return ({image: `${variant.url}${variant.width}w`})
   })
 
