@@ -145,10 +145,10 @@ export const filters = [
   },
   {
     id: 'equipment',
-    label: 'Equipment',
+    label: 'Equipment Type Filter',
     type: 'SelectMultipleFilter',
     group: 'secondary',
-    queryParamNames: ['pub_equipment'],
+    queryParamNames: [ 'pub_equipmentType' ],
     config: {
       // Optional modes: 'has_all', 'has_any'
       // https://www.sharetribe.com/api-reference/marketplace.html#extended-data-filtering
@@ -172,6 +172,28 @@ export const filters = [
           label: 'Chemistry',
         },
       ],
+    },
+  },
+  {
+    id: 'manufactureYear',
+    label: 'Equipment Manufacture Year',
+    type: 'NumberFilter',
+    group: 'primary',
+    queryParamNames: ['pub_manufactureYear'],
+    config: {
+      maxLength: 4,
+      type: 'year'
+    },
+  },
+  {
+    id: 'numberHour',
+    label: 'Max using hour a day',
+    type: 'NumberFilter',
+    group: 'primary',
+    queryParamNames: ['pub_numberHour'],
+    config: {
+      maxLength: 2,
+      type: 'hour'
     },
   },
 ];

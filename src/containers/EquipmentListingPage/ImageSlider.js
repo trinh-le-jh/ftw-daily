@@ -1,14 +1,14 @@
 import { Carousel } from 'react-carousel-minimal';
-import React, { useState } from 'react';
-import { FormattedMessage } from '../../util/reactIntl';
+import React from 'react';
 
 import css from './EquipmentListingPage.module.css';
 
 const ImageSlider = ({images}) => {
-  const [ listImage ] = useState(images.map((image) => {
+  const listImage = images.map((image) => {
     const variant = image.attributes.variants['scaled-xlarge'];
     return ({image: `${variant.url}${variant.width}w`})
-  }))
+  })
+  if(!listImage) return null;
 
   return (
     <div className={css.sectionDescription}>
