@@ -55,15 +55,14 @@ const EditEquipmentListingGeneralPanel = props => {
         }}
         saveActionMsg={submitButtonText}
         onSubmit={values => {
-          const { title, description, type = [], manufacture, rules } = values;
+          const { title, description, equipmentType = [], manufactureYear, numberHour } = values;
           const updateValues = {
             title: title.trim(),
             description,
             publicData: {
-              title,
-              type,
-              manufacture,
-              rules,
+              equipmentType,
+              manufactureYear: Number(manufactureYear),
+              numberHour: Number(numberHour),
               isEquipment: true,
             },
           };

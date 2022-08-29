@@ -47,6 +47,8 @@ class FilterPlainComponent extends Component {
       initialValues,
       keepDirtyOnReinitialize,
       contentPlacementOffset,
+      isNumber,
+      inputName,
     } = this.props;
     const classes = classNames(rootClassName || css.root, className);
 
@@ -76,6 +78,8 @@ class FilterPlainComponent extends Component {
             onChange={this.handleChange}
             initialValues={initialValues}
             keepDirtyOnReinitialize={keepDirtyOnReinitialize}
+            isNumber={isNumber}
+            inputName={inputName}
           >
             {children}
           </FilterForm>
@@ -91,6 +95,7 @@ FilterPlainComponent.defaultProps = {
   plainClassName: null,
   initialValues: null,
   keepDirtyOnReinitialize: false,
+  isNumber: false,
 };
 
 FilterPlainComponent.propTypes = {
@@ -107,6 +112,9 @@ FilterPlainComponent.propTypes = {
 
   // form injectIntl
   intl: intlShape.isRequired,
+
+  isNumber: bool,
+  inputName: string,
 };
 
 const FilterPlain = injectIntl(FilterPlainComponent);

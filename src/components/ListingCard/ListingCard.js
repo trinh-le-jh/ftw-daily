@@ -65,8 +65,11 @@ export const ListingCardComponent = props => {
     ? 'ListingCard.perDay'
     : 'ListingCard.perUnit';
 
+  const productPage = listing.attributes.publicData && listing.attributes.publicData.isEquipment
+    ? 'EquipmentListingPage'
+    : 'ListingPage'
   return (
-    <NamedLink className={classes} name="ListingPage" params={{ id, slug }}>
+    <NamedLink className={classes} name={productPage} params={{ id, slug }}>
       <div
         className={css.threeToTwoWrapper}
         onMouseEnter={() => setActiveListing(currentListing.id)}
