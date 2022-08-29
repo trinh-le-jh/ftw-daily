@@ -71,6 +71,18 @@ export const nonEmptyArray = message => value => {
   return value && Array.isArray(value) && value.length > 0 ? VALID : message;
 };
 
+export const yearNumberByNowValid = message => value => {
+  return !value || ( new Date().getFullYear() >= Number(value) )
+    ? VALID
+    : message;
+}
+
+export const hourNumberValid = message => value => {
+  return !value || ( Number(value) > 0 && Number(value) < 25 )
+    ? VALID
+    : message;
+}
+
 export const autocompleteSearchRequired = message => value => {
   return value && value.search ? VALID : message;
 };

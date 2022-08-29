@@ -6,6 +6,7 @@ import {
   SelectSingleFilter,
   SelectMultipleFilter,
 } from '../../components';
+import NumberFilter from '../../components/NumberFilter/NumberFilter';
 
 /**
  * FilterComponent is used to map configured filter types
@@ -92,6 +93,19 @@ const FilterComponent = props => {
           initialValues={initialValues(queryParamNames)}
           onSubmit={getHandleChangedValueFn(useHistoryPush)}
           {...config}
+          {...rest}
+        />
+      );
+    case 'NumberFilter':
+      return (
+        <NumberFilter
+          id={componentId}
+          label={label}
+          name={name}
+          queryParamNames={queryParamNames}
+          initialValues={initialValues(queryParamNames)}
+          onSubmit={getHandleChangedValueFn(useHistoryPush)}
+          inputConfig={config}
           {...rest}
         />
       );

@@ -109,6 +109,8 @@ class FilterPopup extends Component {
       initialValues,
       keepDirtyOnReinitialize,
       contentPlacementOffset,
+      isNumber,
+      inputName,
     } = this.props;
 
     const classes = classNames(rootClassName || css.root, className);
@@ -146,6 +148,7 @@ class FilterPopup extends Component {
             {this.state.isOpen ? (
               <FilterForm
                 id={`${id}.form`}
+                inputName={inputName}
                 paddingClasses={popupSizeClasses}
                 showAsPopup
                 contentPlacementOffset={contentPlacementOffset}
@@ -154,6 +157,7 @@ class FilterPopup extends Component {
                 onSubmit={this.handleSubmit}
                 onCancel={this.handleCancel}
                 onClear={this.handleClear}
+                isNumber={isNumber}
               >
                 {children}
               </FilterForm>
@@ -175,6 +179,7 @@ FilterPopup.defaultProps = {
   liveEdit: false,
   label: null,
   labelMaxWidth: null,
+  isNumber: false,
 };
 
 FilterPopup.propTypes = {
@@ -193,6 +198,9 @@ FilterPopup.propTypes = {
 
   // form injectIntl
   intl: intlShape.isRequired,
+
+  isNumber: bool,
+  inputName: string,
 };
 
 export default injectIntl(FilterPopup);
