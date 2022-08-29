@@ -7,7 +7,7 @@ const RemoveImageButton = props => {
   const { className, rootClassName, onClick } = props;
   const classes = classNames(rootClassName || css.removeImage, className);
   return (
-    <button className={classes} onClick={onClick}>
+    <button className={classes} onClick={onClick} type="button">
       <svg
         width="10px"
         height="10px"

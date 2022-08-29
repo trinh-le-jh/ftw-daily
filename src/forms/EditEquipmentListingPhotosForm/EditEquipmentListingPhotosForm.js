@@ -8,7 +8,7 @@ import classNames from 'classnames';
 import { propTypes } from '../../util/types';
 import { nonEmptyArray, composeValidators } from '../../util/validators';
 import { isUploadImageOverLimitError } from '../../util/errors';
-import { AddImages, Button, Form, ListingLink, ValidationError } from '../../components';
+import { AddImages, Button, Form, ValidationError } from '../../components';
 
 import css from './EditEquipmentListingPhotosForm.module.css';
 
@@ -68,13 +68,12 @@ export class EditListingPhotosFormComponent extends Component {
           const [ currentMainPhotoUuid, setCurrentMainPhotoUuid ] = useState(mainPhotoUuid)
           const [ mainImage, setMainImage ] = useState(
             mainPhotoUuid && images.length
-              ? images.filter((img) => img.id.uuid == currentMainPhotoUuid)
+              ? images.filter((img) => img.id.uuid === currentMainPhotoUuid)
               : []
           );
 
           const [ subImage, setSubImage ] = useState(
-            images
-              ? images.filter((img) => img.id.uuid !== currentMainPhotoUuid)
+            images ? images.filter((img) => img.id.uuid !== currentMainPhotoUuid)
               : []
           );
 
@@ -84,18 +83,27 @@ export class EditListingPhotosFormComponent extends Component {
             const lastImage = images[images.length -1];
 
             if (isUploadMainPhoto && !lastImage.imageId ) {
-              setMainImage(
-                images.filter((img, idx) =>
-                  idx === images.length -1
-                )
-              );
-              if (images.length !== 1) {
-                setSubImage(
-                  images.filter((img, idx) =>
-                    idx !== images.length -1
-                  )
-                );
-              }
+
+              const imageFilter = images.reduce((filtered, currentImage, currentIndex) => {
+                if ((
+                  typeof currentImage.id === 'object' && currentImage.id.uuid === currentMainPhotoUuid
+                  ) || (
+                  currentImage.imageId && currentImage.imageId.uuid === currentMainPhotoUuid
+                ))
+                  filtered.removeList.push(currentImage)
+                else if (currentIndex === images.length -1)
+                  filtered.mainList.push(currentImage);
+                else
+                  filtered.subList.push(currentImage);
+
+                return filtered;
+              }, {mainList: [], subList: [], removeList: []});
+
+              setMainImage(imageFilter.mainList);
+              setSubImage(imageFilter.subList);
+
+              if (imageFilter.removeList.length)
+                onRemoveImage(imageFilter.removeList[0].id)
               return;
             }
 
@@ -121,7 +129,8 @@ export class EditListingPhotosFormComponent extends Component {
 
             setSubImage(
               images.filter((img) =>
-                !img.imageId || img.imageId.uuid !== currentMainPhotoUuid
+                ( typeof img.id === 'object' && img.id.uuid !== currentMainPhotoUuid ) ||
+                ( img.imageId && img.imageId.uuid !== currentMainPhotoUuid )
               )
             );
 
@@ -188,8 +197,7 @@ export class EditListingPhotosFormComponent extends Component {
           const submitReady = (updated && pristineSinceLastSubmit) || ready;
           const submitInProgress = updateInProgress;
           const submitDisabled =
-            invalid || disabled || submitInProgress || imageUploadRequested || ready || !mainImage.length;
-
+            invalid || disabled || submitInProgress || imageUploadRequested || ready || !currentMainPhotoUuid;
           const classes = classNames(css.root, className);
 
           const altText = intl.formatMessage({
@@ -200,8 +208,9 @@ export class EditListingPhotosFormComponent extends Component {
             <Form
               className={classes}
               onSubmit={e => {
-                const formState = form.getState();
-                formState.values.mainPhotoUuid = currentMainPhotoUuid;
+                form.change('mainPhotoUuid', currentMainPhotoUuid);
+                if (!mainImage.length || !currentMainPhotoUuid) return;
+                this.submittedImages = [...mainImage, ...subImage];
                 handleSubmit(e);
               }}
             >

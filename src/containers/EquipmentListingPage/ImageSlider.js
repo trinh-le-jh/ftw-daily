@@ -8,7 +8,8 @@ const ImageSlider = ({images}) => {
     const variant = image.attributes.variants['scaled-xlarge'];
     return ({image: `${variant.url}${variant.width}w`})
   })
-  if(!listImage) return null;
+
+  if (!listImage.length) return null;
 
   return (
     <div className={css.sectionDescription}>
