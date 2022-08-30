@@ -415,6 +415,7 @@
   "ListingPage.ownListingPendingApproval": "This listing is pending approval.",
   "ListingPage.perDay": "per day",
   "EquipmentListingPage.perDay": "per day",
+  "EquipmentListingPage.perHour": "per hour",
   "ListingPage.perNight": "per night",
   "EquipmentListingPage.perNight": "per night",
   "ListingPage.perUnit": "per unit",
@@ -1082,5 +1083,7 @@
   "UserCard.showFullBioLink": "more",
   "UserCard.viewProfileLink": "View profile",
   "UserDisplayName.banned": "Banned user",
-  "UserDisplayName.deleted": "Deleted user"
+  "UserDisplayName.deleted": "Deleted user",
+  "FieldDateInput.placeholder": "Select date"
+
 }

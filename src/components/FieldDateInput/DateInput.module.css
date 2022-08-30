@@ -58,8 +58,8 @@
     @media (--viewportMedium) {
       font-size: 16px;
       line-height: 32px;
-      padding: 4px 0 9px 0;
-      border-bottom-width: 3px;
+      padding: 4px 0 2px 0;
+      border-bottom-width: 2px;
     }
   }
   & :global(.SingleDatePickerInput) {

@@ -16,16 +16,7 @@ const SectionHeading = props => {
     onContactUser,
   } = props;
 
-  const unitType = config.bookingEquipmentUnitType;
-  const isNightly = unitType === LINE_ITEM_NIGHT;
-  const isDaily = unitType === LINE_ITEM_DAY;
-
-  const unitTranslationKey =
-    isNightly
-      ? 'EquipmentListingPage.perNight'
-      : isDaily
-        ? 'EquipmentListingPage.perDay'
-        : 'EquipmentListingPage.perUnit';
+  const unitTranslationKey = 'EquipmentListingPage.perHour'
 
   return (
     <div className={css.sectionHeading}>
