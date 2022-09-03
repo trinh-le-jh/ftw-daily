@@ -37,7 +37,7 @@ exports[`BookingBreakdown customer transaction data matches snapshot 1`] = `
           </div>
         </div>
         <div
-          className="bookingPeriodSectionRigth"
+          className="bookingPeriodSectionRight"
         >
           <div
             className="dayLabel"
@@ -144,7 +144,7 @@ exports[`BookingBreakdown pretransaction data matches snapshot 1`] = `
           </div>
         </div>
         <div
-          className="bookingPeriodSectionRigth"
+          className="bookingPeriodSectionRight"
         >
           <div
             className="dayLabel"
@@ -251,7 +251,7 @@ exports[`BookingBreakdown provider canceled transaction data matches snapshot 1`
           </div>
         </div>
         <div
-          className="bookingPeriodSectionRigth"
+          className="bookingPeriodSectionRight"
         >
           <div
             className="dayLabel"
@@ -434,7 +434,7 @@ exports[`BookingBreakdown provider transaction data matches snapshot 1`] = `
           </div>
         </div>
         <div
-          className="bookingPeriodSectionRigth"
+          className="bookingPeriodSectionRight"
         >
           <div
             className="dayLabel"

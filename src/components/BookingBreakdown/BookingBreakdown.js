@@ -10,6 +10,7 @@ import {
   propTypes,
   LINE_ITEM_CUSTOMER_COMMISSION,
   LINE_ITEM_PROVIDER_COMMISSION,
+  LINE_ITEM_HOUR,
 } from '../../util/types';
 
 import LineItemBookingPeriod from './LineItemBookingPeriod';
@@ -34,6 +35,7 @@ export const BookingBreakdownComponent = props => {
     unitType,
     transaction,
     booking,
+    timeDisplay,
     intl,
     dateType,
   } = props;
@@ -88,10 +90,13 @@ export const BookingBreakdownComponent = props => {
 
   return (
     <div className={classes}>
-      <LineItemBookingPeriod booking={booking} unitType={unitType} dateType={dateType} />
+      <LineItemBookingPeriod booking={booking} unitType={unitType} dateType={dateType} timeDisplay={timeDisplay} />
       <LineItemUnitsMaybe transaction={transaction} unitType={unitType} />
-
-      <LineItemBasePriceMaybe transaction={transaction} unitType={unitType} intl={intl} />
+      {
+        unitType !== LINE_ITEM_HOUR && (
+          <LineItemBasePriceMaybe transaction={transaction} unitType={unitType} intl={intl} />
+        )
+      }
       <LineItemUnknownItemsMaybe transaction={transaction} isProvider={isProvider} intl={intl} />
 
       <LineItemSubTotalMaybe
@@ -146,6 +151,7 @@ BookingBreakdownComponent.propTypes = {
   transaction: propTypes.transaction.isRequired,
   booking: propTypes.booking.isRequired,
   dateType: propTypes.dateType,
+  timeDisplay: propTypes.object,
 
   // from injectIntl
   intl: intlShape.isRequired,

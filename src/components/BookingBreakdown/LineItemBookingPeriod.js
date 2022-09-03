@@ -40,7 +40,7 @@ const BookingPeriod = props => {
           </div>
         </div>
 
-        <div className={css.bookingPeriodSectionRigth}>
+        <div className={css.bookingPeriodSectionRight}>
           <div className={css.dayLabel}>
             <FormattedMessage id="BookingBreakdown.bookingEnd" />
           </div>
@@ -57,7 +57,7 @@ const BookingPeriod = props => {
 };
 
 const LineItemBookingPeriod = props => {
-  const { booking, unitType, dateType } = props;
+  const { booking, unitType, dateType, timeDisplay } = props;
 
   // Attributes: displayStart and displayEnd can be used to differentiate shown time range
   // from actual start and end times used for availability reservation. It can help in situations
@@ -72,8 +72,25 @@ const LineItemBookingPeriod = props => {
 
   return (
     <>
-      <div className={css.lineItem}>
+      <div>
         <BookingPeriod startDate={localStartDate} endDate={endDay} dateType={dateType} />
+        {
+          timeDisplay && (
+            <div className={css.bookingPeriod}>
+              <div className={css.bookingPeriodSection}>
+                <div className={css.itemLabel}>
+                  {timeDisplay.startHour}
+                </div>
+              </div>
+
+              <div className={css.bookingPeriodSectionRight}>
+                <div className={css.itemLabel}>
+                  {timeDisplay.endHour}
+                </div>
+              </div>
+            </div>
+          )
+        }
       </div>
       <hr className={css.totalDivider} />
     </>

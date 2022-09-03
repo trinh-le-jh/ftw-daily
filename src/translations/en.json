@@ -47,6 +47,7 @@
   "BookingBreakdown.baseUnitDay": "{unitPrice} * {quantity, number} {quantity, plural, one {day} other {days}}",
   "BookingBreakdown.baseUnitNight": "{unitPrice} * {quantity, number} {quantity, plural, one {night} other {nights}}",
   "BookingBreakdown.baseUnitQuantity": "{unitPrice} * {quantity, number} {quantity, plural, one {person} other {persons}}",
+  "BookingBreakdown.baseUnitHour": "{unitPrice} * {quantity, number} {quantity, plural, one {hour} other {hours}}",
   "BookingBreakdown.bookingEnd": "Booking end",
   "BookingBreakdown.bookingStart": "Booking start",
   "BookingBreakdown.commission": "Saunatime fee *",

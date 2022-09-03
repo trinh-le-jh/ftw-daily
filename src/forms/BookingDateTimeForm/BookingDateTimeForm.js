@@ -20,6 +20,8 @@ import loginForm from '../LoginForm/LoginForm';
 const identity = v => v;
 const ONE_HOUR = 60 * 60 * 1000;
 const ONE_DAY = ONE_HOUR * 24;
+const START_HOUR= 'bookingStartHour';
+const END_HOUR= 'bookingEndHour';
 
 const addTime = (date, time, bonusTime) => {
   return {
@@ -50,13 +52,19 @@ export class BookingDateTimeFormComponent extends Component {
   // focus on that input, otherwise continue with the
   // default handleSubmit function.
   handleFormSubmit(e) {
-    const { startDate, endDate } = e;
+    const { startDate, endDate, bookingStartHour, bookingEndHour } = e;
     if (!startDate) {
       e.preventDefault();
       this.setState({ focusedInput: START_DATE });
     } else if (!endDate) {
       e.preventDefault();
       this.setState({ focusedInput: END_DATE });
+    } else if (!bookingStartHour) {
+      e.preventDefault();
+      this.setState({ focusedInput: START_HOUR });
+    } else if (!bookingEndHour) {
+      e.preventDefault();
+      this.setState({ focusedInput: END_HOUR });
     } else {
       this.props.onSubmit(e);
     }
@@ -91,7 +99,7 @@ export class BookingDateTimeFormComponent extends Component {
       const endDate = formValues.values.endDate.date;
 
       this.props.onFetchTransactionLineItems({
-        bookingData: { startDate, endDate },
+        bookingData: { startDate, endDate, unitType: 'line-item/hour' },
         listingId,
         isOwnListing,
       });
@@ -145,8 +153,6 @@ export class BookingDateTimeFormComponent extends Component {
             maxTimeUsing,
           } = fieldRenderProps;
 
-          console.log('lineItems', lineItems);
-
           const selectOption = useMemo(() => Array.from(
               Array(25),
               (i, index) => `${index} ${index < 13 ? 'AM' : 'PM'}`,
@@ -194,6 +200,8 @@ export class BookingDateTimeFormComponent extends Component {
                 unitType,
                 startDate: startDate.date,
                 endDate: endDate.date,
+                startHour: bookingStartHour,
+                endHour: bookingEndHour,
               }
               : null;
 

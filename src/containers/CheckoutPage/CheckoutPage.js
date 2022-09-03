@@ -197,6 +197,8 @@ export class CheckoutPageComponent extends Component {
           listingId,
           bookingStart: bookingStartForAPI,
           bookingEnd: bookingEndForAPI,
+          // bookingDisplayStart: displayStart,
+          // bookingDisplayEnd: displayEnd,
         },
         transactionId
       );
