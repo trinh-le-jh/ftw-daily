@@ -7,17 +7,23 @@
 
 .bookingStartDate {
   flex-shrink: 0;
-  margin-bottom: 38px;
+  margin-bottom: 16px;
   flex: 1;
   /* Ensure that calendar dropdown gets some stacking context relative to other form items below */
   z-index: 2;
+  @media (--viewportMedium) {
+    margin-bottom: 38px;
+  }
 }
 .bookingEndDate {
   flex-shrink: 0;
-  margin-bottom: 38px;
+  margin-bottom: 16px;
   flex: 1;
   /* Ensure that calendar dropdown gets some stacking context relative to other form items below */
   z-index: 1;
+  @media (--viewportMedium) {
+    margin-bottom: 38px;
+  }
 }
 
 .priceBreakdownContainer {
@@ -101,7 +107,18 @@
   display: flex;
   flex-direction: row;
   gap: 15px;
+  flex-wrap: wrap ;
+  margin-bottom: 36px;
+
+  @media (--viewportMedium) {
+    margin-bottom: 0;
+  }
 }
 .timeSelector {
   flex: 1;
+  margin: 0 24px;
+
+  @media (--viewportMedium) {
+    margin: 0;
+  }
 }

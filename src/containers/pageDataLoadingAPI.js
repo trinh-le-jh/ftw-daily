@@ -2,6 +2,7 @@
  * Export loadData calls from ducks modules of different containers
  */
 import { setInitialValues as CheckoutPageInitialValues } from './CheckoutPage/CheckoutPage.duck';
+import { setInitialValues as EquipmentCheckoutPageInitialValues } from './EquipmentCheckoutPage/CheckoutPage.duck';
 import { loadData as ContactDetailsPageLoader } from './ContactDetailsPage/ContactDetailsPage.duck';
 import { loadData as EditListingPageLoader } from './EditListingPage/EditListingPage.duck';
 import { loadData as EditEquipmentListingPageLoader } from './EditEquipmentListingPage/EditEquipmentListingPage.duck';
@@ -23,6 +24,9 @@ const getPageDataLoadingAPI = () => {
   return {
     CheckoutPage: {
       setInitialValues: CheckoutPageInitialValues,
+    },
+    EquipmentCheckoutPage: {
+      setInitialValues: EquipmentCheckoutPageInitialValues,
     },
     ContactDetailsPage: {
       loadData: ContactDetailsPageLoader,

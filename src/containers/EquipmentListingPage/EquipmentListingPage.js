@@ -37,7 +37,6 @@ import {
   LayoutWrapperMain,
   LayoutWrapperFooter,
   Footer,
-  BookingPanel,
   BookingDateTimePanel,
 } from '../../components';
 import { TopbarContainer, NotFoundPage } from '../../containers';
@@ -94,17 +93,22 @@ export class ListingPageComponent extends Component {
     const listingId = new UUID(params.id);
     const listing = getListing(listingId);
 
-    const { startDate, endDate } = values;
+    const { startDate, endDate, bookingStartHour, bookingEndHour } = values;
 
+    const displayStart = startDate.date;
+    displayStart.setHours(Number(bookingStartHour.replace(/[^\d]/g, '')));
+    const displayEnd = endDate.date;
+    displayEnd.setHours(Number(bookingEndHour.replace(/[^\d]/g, '')));
     const initialValues = {
       listing,
       bookingData: {
         startDate,
-        endDate
+        endDate,
+        unitType: 'line-item/hour'
       },
       bookingDates: {
-        bookingStart: startDate.date,
-        bookingEnd: endDate.date,
+        bookingStart: displayStart,
+        bookingEnd: displayEnd,
       },
       confirmPaymentError: null,
     };
@@ -113,7 +117,7 @@ export class ListingPageComponent extends Component {
 
     const routes = routeConfiguration();
     // Customize checkout page state with current listing and selected bookingDates
-    const { setInitialValues } = findRouteByRouteName('CheckoutPage', routes);
+    const { setInitialValues } = findRouteByRouteName('EquipmentCheckoutPage', routes);
 
     callSetInitialValues(setInitialValues, initialValues, saveToSessionStorage);
 
@@ -123,7 +127,7 @@ export class ListingPageComponent extends Component {
     // Redirect to CheckoutPage
     history.push(
       createResourceLocatorString(
-        'CheckoutPage',
+        'EquipmentCheckoutPage',
         routes,
         { id: listing.id.uuid, slug: createSlug(listing.attributes.title) },
         {}
@@ -477,7 +481,7 @@ export class ListingPageComponent extends Component {
 }
 
 ListingPageComponent.defaultProps = {
-  unitType: config.bookingUnitType,
+  unitType: config.bookingEquipmentUnitType,
   currentUser: null,
   enquiryModalOpenForListingId: null,
   showListingError: null,

@@ -1,46 +1,110 @@
 import React, { useState } from 'react';
 import { withRouter } from 'react-router-dom';
 import { compose } from 'redux';
-import { injectIntl, intlShape } from '../../util/reactIntl';
+import { FormattedMessage, injectIntl, intlShape } from '../../util/reactIntl';
 import config from '../../config';
 import { array, arrayOf, bool, func, node, oneOfType, shape, string } from 'prop-types';
-import { propTypes } from '../../util/types';
+import { LISTING_STATE_CLOSED, propTypes } from '../../util/types';
 import classNames from 'classnames';
-import { FieldDateInput, ModalInMobile } from '../../components';
+import { Button, FieldDateInput, ModalInMobile } from '../../components';
 import { BookingDateTimeForm } from '../../forms';
 
 import css from './BookingDateTimePanel.module.css';
+import { parse, stringify } from '../../util/urlHelpers';
+import omit from 'lodash/omit';
+import { formatMoney } from '../../util/currency';
 
 const MODAL_BREAKPOINT = 1023;
+
+const closeBookModal = (history, location) => {
+  const { pathname, search, state } = location;
+  const searchParams = omit(parse(search), 'book');
+  const searchString = `?${stringify(searchParams)}`;
+  history.push(`${pathname}${searchString}`, state);
+};
+
+const openBookModal = (isOwnListing, isClosed, history, location) => {
+  if (isOwnListing || isClosed) {
+    window.scrollTo(0, 0);
+  } else {
+    const { pathname, search, state } = location;
+    const searchString = `?${stringify({ ...parse(search), book: true })}`;
+    history.push(`${pathname}${searchString}`, state);
+  }
+};
+
+const priceData = (price, intl) => {
+  if (price && price.currency === config.currency) {
+    const formattedPrice = formatMoney(intl, price);
+    return { formattedPrice, priceTitle: formattedPrice };
+  } else if (price) {
+    return {
+      formattedPrice: `(${price.currency})`,
+      priceTitle: `Unsupported currency (${price.currency})`,
+    };
+  }
+  return {};
+};
 
 const BookingDateTimePanel = props => {
   const {
     rootClassName,
     className,
+    titleClassName,
     onManageDisableScrolling,
     listing,
     isOwnListing,
     onSubmit,
     timeSlots,
+    title,
+    subTitle,
+    authorDisplayName,
     unitType,
+    history,
+    location,
     fetchTimeSlotsError,
     onFetchTransactionLineItems,
     lineItems,
     fetchLineItemsError,
     fetchLineItemsInProgress,
+    intl,
   } = props;
   const classes = classNames(rootClassName || css.root, className);
   const price = listing.attributes.price;
+  const hasListingState = !!listing.attributes.state;
+  const isClosed = hasListingState && listing.attributes.state === LISTING_STATE_CLOSED;
   const maxTimeUsing = listing.attributes.publicData.numberHour;
+  const showClosedListingHelpText = listing.id && isClosed;
+  const showBookingDatesForm = hasListingState && !isClosed;
+  const { formattedPrice, priceTitle } = priceData(price, intl);
+  const isBook = !!parse(location.search).book;
+  const titleClasses = classNames(titleClassName || css.bookingTitle);
+  const subTitleText = !!subTitle
+    ? subTitle
+    : showClosedListingHelpText
+      ? intl.formatMessage({ id: 'BookingPanel.subTitleClosedListing' })
+      : null;
   return (
     <div className={classes}>
       <ModalInMobile
         containerClassName={css.modalContainer}
         id="BookingDateTimeFirmInModal"
-        isModalOpenOnMobile={false}
+        isModalOpenOnMobile={isBook}
+        onClose={() => closeBookModal(history, location)}
         showAsModalMaxWidth={MODAL_BREAKPOINT}
         onManageDisableScrolling={onManageDisableScrolling}
       >
+        <div className={css.modalHeading}>
+          <h1 className={css.title}>{title}</h1>
+          <div className={css.author}>
+            <FormattedMessage id="BookingPanel.hostedBy" values={{ name: authorDisplayName }} />
+          </div>
+        </div>
+
+        <div className={css.bookingHeading}>
+          <h2 className={titleClasses}>{title}</h2>
+          {subTitleText ? <div className={css.bookingHelp}>{subTitleText}</div> : null}
+        </div>
         <BookingDateTimeForm
           formId="BookingDTPanel"
           price={price}
@@ -59,6 +123,29 @@ const BookingDateTimePanel = props => {
           maxTimeUsing={maxTimeUsing}
         />
       </ModalInMobile>
+      <div className={css.openBookingForm}>
+        <div className={css.priceContainer}>
+          <div className={css.priceValue} title={priceTitle}>
+            {formattedPrice}
+          </div>
+          <div className={css.perUnit}>
+            <FormattedMessage id="EquipmentListingPage.perHour" />
+          </div>
+        </div>
+
+        {showBookingDatesForm ? (
+          <Button
+            rootClassName={css.bookButton}
+            onClick={() => openBookModal(isOwnListing, isClosed, history, location)}
+          >
+            <FormattedMessage id="BookingPanel.ctaButtonMessage" />
+          </Button>
+        ) : isClosed ? (
+          <div className={css.closedListingButton}>
+            <FormattedMessage id="BookingPanel.closedListingButtonText" />
+          </div>
+        ) : null}
+      </div>
     </div>
   )
 
@@ -70,7 +157,7 @@ BookingDateTimePanel.defaultProps = {
   titleClassName: null,
   isOwnListing: false,
   subTitle: null,
-  unitType: config.bookingUnitType,
+  unitType: config.bookingEquipmentUnitType,
   timeSlots: null,
   fetchTimeSlotsError: null,
   lineItems: null,

@@ -1,10 +1,11 @@
 import React from 'react';
 import { FormattedMessage, FormattedDate } from '../../util/reactIntl';
 import moment from 'moment';
-import { LINE_ITEM_NIGHT, DATE_TYPE_DATE, propTypes, LINE_ITEM_HOUR } from '../../util/types';
+import { LINE_ITEM_NIGHT, LINE_ITEM_HOUR, DATE_TYPE_DATE, propTypes } from '../../util/types';
 import { dateFromAPIToLocalNoon } from '../../util/dates';
 
 import css from './BookingBreakdown.module.css';
+import { object } from 'prop-types';
 
 const BookingPeriod = props => {
   const { startDate, endDate, dateType } = props;
@@ -68,14 +69,15 @@ const LineItemBookingPeriod = props => {
   const localEndDateRaw = dateFromAPIToLocalNoon(displayEnd || end);
 
   const isNightly = unitType === LINE_ITEM_NIGHT;
-  const endDay = isNightly ? localEndDateRaw : moment(localEndDateRaw).subtract(1, 'days');
+  const isHourly = unitType === LINE_ITEM_HOUR;
+  const endDay = isNightly || isHourly ? localEndDateRaw : moment(localEndDateRaw).subtract(1, 'days');
 
   return (
     <>
       <div>
         <BookingPeriod startDate={localStartDate} endDate={endDay} dateType={dateType} />
         {
-          timeDisplay && (
+          !!timeDisplay && (
             <div className={css.bookingPeriod}>
               <div className={css.bookingPeriodSection}>
                 <div className={css.itemLabel}>
@@ -101,6 +103,7 @@ LineItemBookingPeriod.defaultProps = { dateType: null };
 LineItemBookingPeriod.propTypes = {
   booking: propTypes.booking.isRequired,
   dateType: propTypes.dateType,
+  timeDisplay: propTypes.timeDisplay || undefined,
 };
 
 export default LineItemBookingPeriod;

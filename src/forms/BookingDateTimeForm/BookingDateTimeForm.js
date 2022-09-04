@@ -91,15 +91,18 @@ export class BookingDateTimeFormComponent extends Component {
       !this.props.fetchLineItemsInProgress
     ) {
 
+      const startDate = { ...formValues.values.startDate };
+      startDate.date.setHours(Number(bookingStartHour.replace(/[^\d]/g, '')));
 
-      formValues.values.startDate.date.setHours(Number(bookingStartHour.replace(/[^\d]/g, '')));
-      const startDate = formValues.values.startDate.date;
-
-      formValues.values.endDate.date.setHours(Number(bookingEndHour.replace(/[^\d]/g, '')));
-      const endDate = formValues.values.endDate.date;
+      const endDate = { ...formValues.values.endDate };
+      endDate.date.setHours(Number(bookingEndHour.replace(/[^\d]/g, '')));
 
       this.props.onFetchTransactionLineItems({
-        bookingData: { startDate, endDate, unitType: 'line-item/hour' },
+        bookingData: {
+          startDate: startDate.date,
+          endDate: endDate.date,
+          unitType: 'line-item/hour'
+        },
         listingId,
         isOwnListing,
       });
@@ -234,18 +237,16 @@ export class BookingDateTimeFormComponent extends Component {
 
           const maxBookingDateTime = values['startDate'] && values['bookingStartHour']
             ? addTime(
-              dateSelected,
-              Number(values['bookingStartHour'].replace(/[^\d]/g, '')),
-              maxTimeUsing
-            )
+                dateSelected,
+                Number(values['bookingStartHour'].replace(/[^\d]/g, '')),
+                maxTimeUsing)
             : undefined;
 
           const minBookingDateTime = values['startDate'] && values['bookingStartHour']
             ? addTime(
-              dateSelected,
-              Number(values['bookingStartHour'].replace(/[^\d]/g, '')),
-              1
-            )
+                dateSelected,
+                Number(values['bookingStartHour'].replace(/[^\d]/g, '')),
+                1)
             : undefined;
 
           const timeSlotsEnd = values['startDate'] && values['bookingStartHour']
