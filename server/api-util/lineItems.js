@@ -41,10 +41,14 @@ exports.transactionLineItems = (listing, bookingData) => {
    *
    * By default BookingBreakdown prints line items inside LineItemUnknownItemsMaybe if the lineItem code is not recognized. */
 
+  const isUseDisplay = bookingData.displayStart && bookingData.displayEnd;
   const booking = {
     code: unitType? unitType : bookingUnitType,
     unitPrice,
-    quantity: calculateQuantityFromDates(startDate, endDate, unitType? unitType : bookingUnitType),
+    quantity: calculateQuantityFromDates(
+      isUseDisplay? bookingData.displayStart: startDate,
+      isUseDisplay? bookingData.displayEnd: endDate,
+      unitType? unitType : bookingUnitType),
     includeFor: ['customer', 'provider'],
   };
 

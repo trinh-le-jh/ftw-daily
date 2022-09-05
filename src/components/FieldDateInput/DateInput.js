@@ -5,7 +5,7 @@
  * N.B. *isOutsideRange* in defaultProps is defining what dates are available to booking.
  */
 import React, { Component } from 'react';
-import { bool, func, instanceOf, shape, string, arrayOf } from 'prop-types';
+import { bool, func, instanceOf, shape, string, arrayOf, any } from 'prop-types';
 import {
   SingleDatePicker,
   isInclusivelyAfterDay,
@@ -169,7 +169,7 @@ class DateInputComponent extends Component {
 
     const initialMoment = initialDate ? moment(initialDate) : null;
 
-    const date = value && value.date instanceof Date ? moment(value.date) : initialMoment;
+    const date = value && value.date && value.date instanceof Date ? moment(value.date) : initialMoment;
 
     const isDayBlocked = timeSlots
       ? day => !timeSlots.find(timeSlot => timeSlotEqualsDay(timeSlot, day))
@@ -236,9 +236,7 @@ DateInputComponent.propTypes = {
   useMobileMargins: bool,
   placeholderText: string,
   screenReaderInputMessage: string,
-  value: shape({
-    date: instanceOf(Date),
-  }),
+  value: any,
   timeSlots: arrayOf(propTypes.timeSlot),
 };
 

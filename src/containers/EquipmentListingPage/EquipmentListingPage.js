@@ -95,10 +95,6 @@ export class ListingPageComponent extends Component {
 
     const { startDate, endDate, bookingStartHour, bookingEndHour } = values;
 
-    const displayStart = startDate.date;
-    displayStart.setHours(Number(bookingStartHour.replace(/[^\d]/g, '')));
-    const displayEnd = endDate.date;
-    displayEnd.setHours(Number(bookingEndHour.replace(/[^\d]/g, '')));
     const initialValues = {
       listing,
       bookingData: {
@@ -107,8 +103,10 @@ export class ListingPageComponent extends Component {
         unitType: 'line-item/hour'
       },
       bookingDates: {
-        bookingStart: displayStart,
-        bookingEnd: displayEnd,
+        bookingStart: startDate.date,
+        bookingEnd: endDate.date,
+        bookingStartHour,
+        bookingEndHour,
       },
       confirmPaymentError: null,
     };

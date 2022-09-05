@@ -151,7 +151,7 @@ BookingBreakdownComponent.propTypes = {
   transaction: propTypes.transaction.isRequired,
   booking: propTypes.booking.isRequired,
   dateType: propTypes.dateType,
-  timeDisplay: propTypes.object,
+  timeDisplay: propTypes.timeDisplay,
 
   // from injectIntl
   intl: intlShape.isRequired,

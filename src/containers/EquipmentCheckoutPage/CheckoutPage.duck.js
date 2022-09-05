@@ -312,6 +312,10 @@ export const speculateTransaction = (orderParams, transactionId) => (dispatch, g
   const bookingData = {
     startDate: orderParams.bookingStart,
     endDate: orderParams.bookingEnd,
+    unitType: orderParams.unitType,
+    // For line item get by hour
+    displayStart: orderParams.displayStart,
+    displayEnd: orderParams.displayEnd,
   };
 
   const params = {

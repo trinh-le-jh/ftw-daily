@@ -91,16 +91,16 @@ export class BookingDateTimeFormComponent extends Component {
       !this.props.fetchLineItemsInProgress
     ) {
 
-      const startDate = { ...formValues.values.startDate };
-      startDate.date.setHours(Number(bookingStartHour.replace(/[^\d]/g, '')));
+      const startDateForFetch = new Date(formValues.values.startDate.date);
+      startDateForFetch.setHours(Number(bookingStartHour.replace(/[^\d]/g, '')));
 
-      const endDate = { ...formValues.values.endDate };
-      endDate.date.setHours(Number(bookingEndHour.replace(/[^\d]/g, '')));
+      const endDateForFetch = new Date(formValues.values.endDate.date);
+      endDateForFetch.setHours(Number(bookingEndHour.replace(/[^\d]/g, '')));
 
       this.props.onFetchTransactionLineItems({
         bookingData: {
-          startDate: startDate.date,
-          endDate: endDate.date,
+          startDate: startDateForFetch,
+          endDate: endDateForFetch,
           unitType: 'line-item/hour'
         },
         listingId,

@@ -253,7 +253,7 @@ propTypes.booking = shape({
 propTypes.timeDisplay = shape({
   startHour: string,
   endHour: string,
-});
+} || undefined);
 
 // A time slot that covers one day, having a start and end date.
 export const TIME_SLOT_DAY = 'time-slot/day';

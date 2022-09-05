@@ -197,16 +197,28 @@ export class CheckoutPageComponent extends Component {
       if ( pageData.bookingData.unitType === 'line-item/hour' ) {
         const oneDateTime = 60 * 60 * 1000 *24;
 
-        const dateStart = new Date(bookingStart.setUTCHours(0) + oneDateTime);
+        const dateStart = new Date(bookingStart);
         const dateEnd = new Date(dateStart.getTime() + oneDateTime);
+
+        const displayStart = new Date(bookingStart);
+        displayStart.setHours(
+          Number(pageData.bookingDates.bookingStartHour.replace(/[^\d]/g, ''))
+        )
+
+        const displayEnd = new Date(bookingEnd);
+        displayEnd.setHours(
+          Number(pageData.bookingDates.bookingEndHour.replace(/[^\d]/g, ''))
+        )
 
         fetchSpeculatedTransaction(
           {
             listingId,
             bookingStart: dateStart,
             bookingEnd: dateEnd,
-            bookingDisplayStart: bookingStartForAPI,
-            bookingDisplayEnd: bookingEndForAPI,
+
+            displayStart: displayStart,
+            displayEnd: displayEnd,
+            unitType: 'line-item/hour',
           },
           transactionId
         );
@@ -591,19 +603,22 @@ export class CheckoutPageComponent extends Component {
     // (i.e. have an id)
     const tx = existingTransaction.booking ? existingTransaction : speculatedTransaction;
     const txBooking = ensureBooking(tx.booking);
-    console.log('tx', tx.booking.attributes);
-    console.log('bs', bookingDates);
-    // tx.booking.attributes.displayStart = bookingDates.bookingStart;
-    // tx.booking.attributes.displayEnd = bookingDates.bookingEnd;
+
+    txBooking.attributes.displayStart = bookingDates.bookingStart;
+    txBooking.attributes.displayEnd = bookingDates.bookingEnd;
 
     const breakdown =
       tx.id && txBooking.id ? (
         <BookingBreakdown
           className={css.bookingBreakdown}
           userRole="customer"
-          unitType={config.bookingUnitType}
+          unitType={config.bookingEquipmentUnitType}
           transaction={tx}
           booking={txBooking}
+          timeDisplay={{
+            startHour: bookingDates.bookingStartHour,
+            endHour: bookingDates.bookingEndHour,
+          }}
           dateType={DATE_TYPE_DATE}
         />
       ) : null;
@@ -731,11 +746,7 @@ export class CheckoutPageComponent extends Component {
     const isNightly = unitType === LINE_ITEM_NIGHT;
     const isDaily = unitType === LINE_ITEM_DAY;
 
-    const unitTranslationKey = isNightly
-      ? 'CheckoutPage.perNight'
-      : isDaily
-      ? 'CheckoutPage.perDay'
-      : 'CheckoutPage.perUnit';
+    const unitTranslationKey = 'CheckoutPage.perHour';
 
     const price = currentListing.attributes.price;
     const formattedPrice = formatMoney(intl, price);
@@ -882,6 +893,8 @@ CheckoutPageComponent.propTypes = {
   bookingDates: shape({
     bookingStart: instanceOf(Date).isRequired,
     bookingEnd: instanceOf(Date).isRequired,
+    bookingStartHour: string,
+    bookingEndHour: string,
   }),
   fetchStripeCustomer: func.isRequired,
   stripeCustomerFetched: bool.isRequired,
