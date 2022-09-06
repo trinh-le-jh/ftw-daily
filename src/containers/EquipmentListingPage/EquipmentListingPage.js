@@ -37,7 +37,7 @@ import {
   LayoutWrapperMain,
   LayoutWrapperFooter,
   Footer,
-  BookingPanel,
+  BookingDateTimePanel,
 } from '../../components';
 import { TopbarContainer, NotFoundPage } from '../../containers';
 
@@ -93,14 +93,20 @@ export class ListingPageComponent extends Component {
     const listingId = new UUID(params.id);
     const listing = getListing(listingId);
 
-    const { bookingDates, ...bookingData } = values;
+    const { startDate, endDate, bookingStartHour, bookingEndHour } = values;
 
     const initialValues = {
       listing,
-      bookingData,
+      bookingData: {
+        startDate,
+        endDate,
+        unitType: 'line-item/hour'
+      },
       bookingDates: {
-        bookingStart: bookingDates.startDate,
-        bookingEnd: bookingDates.endDate,
+        bookingStart: startDate.date,
+        bookingEnd: endDate.date,
+        bookingStartHour,
+        bookingEndHour,
       },
       confirmPaymentError: null,
     };
@@ -109,7 +115,7 @@ export class ListingPageComponent extends Component {
 
     const routes = routeConfiguration();
     // Customize checkout page state with current listing and selected bookingDates
-    const { setInitialValues } = findRouteByRouteName('CheckoutPage', routes);
+    const { setInitialValues } = findRouteByRouteName('EquipmentCheckoutPage', routes);
 
     callSetInitialValues(setInitialValues, initialValues, saveToSessionStorage);
 
@@ -119,7 +125,7 @@ export class ListingPageComponent extends Component {
     // Redirect to CheckoutPage
     history.push(
       createResourceLocatorString(
-        'CheckoutPage',
+        'EquipmentCheckoutPage',
         routes,
         { id: listing.id.uuid, slug: createSlug(listing.attributes.title) },
         {}
@@ -443,7 +449,7 @@ export class ListingPageComponent extends Component {
                     onManageDisableScrolling={onManageDisableScrolling}
                   />
                 </div>
-                <BookingPanel
+                <BookingDateTimePanel
                   className={css.bookingPanel}
                   listing={currentListing}
                   isOwnListing={isOwnListing}
@@ -473,7 +479,7 @@ export class ListingPageComponent extends Component {
 }
 
 ListingPageComponent.defaultProps = {
-  unitType: config.bookingUnitType,
+  unitType: config.bookingEquipmentUnitType,
   currentUser: null,
   enquiryModalOpenForListingId: null,
   showListingError: null,

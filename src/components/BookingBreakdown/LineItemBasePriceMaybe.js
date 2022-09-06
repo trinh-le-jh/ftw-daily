@@ -1,7 +1,7 @@
 import React from 'react';
 import { FormattedMessage, intlShape } from '../../util/reactIntl';
 import { formatMoney } from '../../util/currency';
-import { LINE_ITEM_NIGHT, LINE_ITEM_DAY, propTypes } from '../../util/types';
+import { LINE_ITEM_NIGHT, LINE_ITEM_DAY, propTypes, LINE_ITEM_HOUR } from '../../util/types';
 
 import css from './BookingBreakdown.module.css';
 
@@ -9,10 +9,13 @@ const LineItemBasePriceMaybe = props => {
   const { transaction, unitType, intl } = props;
   const isNightly = unitType === LINE_ITEM_NIGHT;
   const isDaily = unitType === LINE_ITEM_DAY;
+  const isHourly = unitType === LINE_ITEM_HOUR;
   const translationKey = isNightly
     ? 'BookingBreakdown.baseUnitNight'
     : isDaily
     ? 'BookingBreakdown.baseUnitDay'
+    : isHourly
+    ? 'BookingBreakdown.baseUnitHour'
     : 'BookingBreakdown.baseUnitQuantity';
 
   // Find correct line-item for given unitType prop.

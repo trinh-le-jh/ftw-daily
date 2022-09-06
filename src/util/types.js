@@ -250,6 +250,11 @@ propTypes.booking = shape({
   }),
 });
 
+propTypes.timeDisplay = shape({
+  startHour: string,
+  endHour: string,
+} || undefined);
+
 // A time slot that covers one day, having a start and end date.
 export const TIME_SLOT_DAY = 'time-slot/day';
 
@@ -330,6 +335,7 @@ propTypes.defaultPaymentMethod = shape({
 export const LINE_ITEM_NIGHT = 'line-item/night';
 export const LINE_ITEM_DAY = 'line-item/day';
 export const LINE_ITEM_UNITS = 'line-item/units';
+export const LINE_ITEM_HOUR = 'line-item/hour';
 export const LINE_ITEM_CUSTOMER_COMMISSION = 'line-item/customer-commission';
 export const LINE_ITEM_PROVIDER_COMMISSION = 'line-item/provider-commission';
 
@@ -341,7 +347,7 @@ export const LINE_ITEMS = [
   LINE_ITEM_PROVIDER_COMMISSION,
 ];
 
-propTypes.bookingUnitType = oneOf([LINE_ITEM_NIGHT, LINE_ITEM_DAY, LINE_ITEM_UNITS]);
+propTypes.bookingUnitType = oneOf([LINE_ITEM_NIGHT, LINE_ITEM_DAY, LINE_ITEM_UNITS, LINE_ITEM_HOUR]);
 
 const requiredLineItemPropType = (props, propName, componentName) => {
   const prop = props[propName];

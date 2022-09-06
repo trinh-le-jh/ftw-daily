@@ -40,3 +40,11 @@ exports.daysBetween = (startDate, endDate) => {
   }
   return days;
 };
+
+exports.hoursBetween = (startDate, endDate) => {
+  const hours = moment(endDate).diff(startDate, 'hours');
+  if (hours < 0) {
+    throw new Error('End date cannot be before start date');
+  }
+  return hours;
+};

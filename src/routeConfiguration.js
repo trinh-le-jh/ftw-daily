@@ -13,6 +13,7 @@ const pageDataLoadingAPI = getPageDataLoadingAPI();
 const AboutPage = loadable(() => import(/* webpackChunkName: "AboutPage" */ './containers/AboutPage/AboutPage'));
 const AuthenticationPage = loadable(() => import(/* webpackChunkName: "AuthenticationPage" */ './containers/AuthenticationPage/AuthenticationPage'));
 const CheckoutPage = loadable(() => import(/* webpackChunkName: "CheckoutPage" */ './containers/CheckoutPage/CheckoutPage'));
+const EquipmentCheckoutPage = loadable(() => import(/* webpackChunkName: "CheckoutEquipmentCheckoutPagePage" */ './containers/EquipmentCheckoutPage/EquipmentCheckoutPage'));
 const ContactDetailsPage = loadable(() => import(/* webpackChunkName: "ContactDetailsPage" */ './containers/ContactDetailsPage/ContactDetailsPage'));
 const EditListingPage = loadable(() => import(/* webpackChunkName: "EditListingPage" */ './containers/EditListingPage/EditListingPage'));
 const EditEquipmentListingPage = loadable(() => import(/* webpackChunkName: "EditEquipmentListingPage" */ './containers/EditEquipmentListingPage/EditEquipmentListingPage'));
@@ -97,6 +98,13 @@ const routeConfiguration = () => {
       name: 'EquipmentListingPage',
       component: EquipmentListingPage,
       loadData: pageDataLoadingAPI.EquipmentListingPage.loadData,
+    },
+    {
+      path: '/e/:slug/:id/checkout',
+      name: 'EquipmentCheckoutPage',
+      auth: true,
+      component: EquipmentCheckoutPage,
+      setInitialValues: pageDataLoadingAPI.EquipmentCheckoutPage.setInitialValues,
     },
     {
       path: '/e/:slug/:id/:type/:tab',

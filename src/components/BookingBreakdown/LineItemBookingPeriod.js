@@ -1,10 +1,11 @@
 import React from 'react';
 import { FormattedMessage, FormattedDate } from '../../util/reactIntl';
 import moment from 'moment';
-import { LINE_ITEM_NIGHT, DATE_TYPE_DATE, propTypes } from '../../util/types';
+import { LINE_ITEM_NIGHT, LINE_ITEM_HOUR, DATE_TYPE_DATE, propTypes } from '../../util/types';
 import { dateFromAPIToLocalNoon } from '../../util/dates';
 
 import css from './BookingBreakdown.module.css';
+import { object } from 'prop-types';
 
 const BookingPeriod = props => {
   const { startDate, endDate, dateType } = props;
@@ -40,7 +41,7 @@ const BookingPeriod = props => {
           </div>
         </div>
 
-        <div className={css.bookingPeriodSectionRigth}>
+        <div className={css.bookingPeriodSectionRight}>
           <div className={css.dayLabel}>
             <FormattedMessage id="BookingBreakdown.bookingEnd" />
           </div>
@@ -57,7 +58,7 @@ const BookingPeriod = props => {
 };
 
 const LineItemBookingPeriod = props => {
-  const { booking, unitType, dateType } = props;
+  const { booking, unitType, dateType, timeDisplay } = props;
 
   // Attributes: displayStart and displayEnd can be used to differentiate shown time range
   // from actual start and end times used for availability reservation. It can help in situations
@@ -68,12 +69,30 @@ const LineItemBookingPeriod = props => {
   const localEndDateRaw = dateFromAPIToLocalNoon(displayEnd || end);
 
   const isNightly = unitType === LINE_ITEM_NIGHT;
-  const endDay = isNightly ? localEndDateRaw : moment(localEndDateRaw).subtract(1, 'days');
+  const isHourly = unitType === LINE_ITEM_HOUR;
+  const endDay = isNightly || isHourly ? localEndDateRaw : moment(localEndDateRaw).subtract(1, 'days');
 
   return (
     <>
-      <div className={css.lineItem}>
+      <div>
         <BookingPeriod startDate={localStartDate} endDate={endDay} dateType={dateType} />
+        {
+          !!timeDisplay && (
+            <div className={css.bookingPeriod}>
+              <div className={css.bookingPeriodSection}>
+                <div className={css.itemLabel}>
+                  {timeDisplay.startHour}
+                </div>
+              </div>
+
+              <div className={css.bookingPeriodSectionRight}>
+                <div className={css.itemLabel}>
+                  {timeDisplay.endHour}
+                </div>
+              </div>
+            </div>
+          )
+        }
       </div>
       <hr className={css.totalDivider} />
     </>
@@ -84,6 +103,7 @@ LineItemBookingPeriod.defaultProps = { dateType: null };
 LineItemBookingPeriod.propTypes = {
   booking: propTypes.booking.isRequired,
   dateType: propTypes.dateType,
+  timeDisplay: propTypes.timeDisplay || undefined,
 };
 
 export default LineItemBookingPeriod;
