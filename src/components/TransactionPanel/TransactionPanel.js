@@ -364,6 +364,7 @@ export class TransactionPanelComponent extends Component {
               listingId={currentListing.id && currentListing.id.uuid}
               listingTitle={listingTitle}
               listingDeleted={listingDeleted}
+              isEquipment={currentListing.attributes.publicData.isEquipment}
             />
 
             <div className={css.bookingDetailsMobile}>

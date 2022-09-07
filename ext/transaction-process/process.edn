@@ -81,6 +81,14 @@
     {:name :action/stripe-refund-payment}],
    :from :state/accepted,
    :to :state/cancelled}
+  {:name :transition/decline-preauthorized-by-operator,
+   :actor :actor.role/operator,
+   :actions
+   [{:name :action/decline-booking}
+     {:name :action/calculate-full-refund}
+     {:name :action/stripe-refund-payment}],
+   :from :state/preauthorized,
+   :to :state/declined-by-operator}
   {:name :transition/review-1-by-provider,
    :actor :actor.role/provider,
    :actions [{:name :action/post-review-by-provider}],

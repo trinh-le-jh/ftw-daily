@@ -41,7 +41,7 @@ import {
 } from '../../components';
 import { TopbarContainer, NotFoundPage } from '../../containers';
 
-import { sendEnquiry, fetchTransactionLineItems, setInitialValues } from './EquipmentListingPage.duck';
+import { sendEnquiry, fetchTransactionEquipmentLineItems, setInitialValues } from './EquipmentListingPage.duck';
 import SectionImages from './SectionImages';
 import SectionHeading from './SectionHeading';
 import SectionGeneral from './SectionGeneral';
@@ -67,7 +67,7 @@ const priceData = (price, intl) => {
   return {};
 };
 
-export class ListingPageComponent extends Component {
+export class EquipmentListingPageComponent extends Component {
   constructor(props) {
     super(props);
     const { enquiryModalOpenForListingId, params } = props;
@@ -478,7 +478,7 @@ export class ListingPageComponent extends Component {
   }
 }
 
-ListingPageComponent.defaultProps = {
+EquipmentListingPageComponent.defaultProps = {
   unitType: config.bookingEquipmentUnitType,
   currentUser: null,
   enquiryModalOpenForListingId: null,
@@ -493,7 +493,7 @@ ListingPageComponent.defaultProps = {
   fetchLineItemsError: null,
 };
 
-ListingPageComponent.propTypes = {
+EquipmentListingPageComponent.propTypes = {
   // from withRouter
   history: shape({
     push: func.isRequired,
@@ -591,7 +591,7 @@ const mapDispatchToProps = dispatch => ({
   callSetInitialValues: (setInitialValues, values, saveToSessionStorage) =>
     dispatch(setInitialValues(values, saveToSessionStorage)),
   onFetchTransactionLineItems: (bookingData, listingId, isOwnListing) =>
-    dispatch(fetchTransactionLineItems(bookingData, listingId, isOwnListing)),
+    dispatch(fetchTransactionEquipmentLineItems(bookingData, listingId, isOwnListing)),
   onSendEnquiry: (listingId, message) => dispatch(sendEnquiry(listingId, message)),
   onInitializeCardPaymentData: () => dispatch(initializeCardPaymentData()),
 });
@@ -609,6 +609,6 @@ const EquipmentListingPage = compose(
     mapDispatchToProps
   ),
   injectIntl
-)(ListingPageComponent);
+)(EquipmentListingPageComponent);
 
 export default EquipmentListingPage;

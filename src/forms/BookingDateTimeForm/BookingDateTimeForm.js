@@ -101,7 +101,9 @@ export class BookingDateTimeFormComponent extends Component {
         bookingData: {
           startDate: startDateForFetch,
           endDate: endDateForFetch,
-          unitType: 'line-item/hour'
+          unitType: 'line-item/hour',
+          displayStart: startDateForFetch,
+          displayEnd: endDateForFetch,
         },
         listingId,
         isOwnListing,
@@ -408,7 +410,7 @@ BookingDateTimeFormComponent.propTypes = {
   // for tests
   startDatePlaceholder: string,
   endDatePlaceholder: string,
-  maxTimeUsing: number.isRequired,
+  maxTimeUsing: number,
 };
 
 const BookingDateTimeForm = compose(injectIntl)(BookingDateTimeFormComponent);

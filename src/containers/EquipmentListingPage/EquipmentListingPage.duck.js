@@ -4,7 +4,7 @@ import config from '../../config';
 import { types as sdkTypes } from '../../util/sdkLoader';
 import { storableError } from '../../util/errors';
 import { addMarketplaceEntities } from '../../ducks/marketplaceData.duck';
-import { transactionLineItems } from '../../util/api';
+import { transactionLineItems, transactionEquipmentLineItems } from '../../util/api';
 import * as log from '../../util/log';
 import { denormalisedResponseEntities } from '../../util/data';
 import { TRANSITION_ENQUIRE } from '../../util/transaction';
@@ -275,7 +275,7 @@ export const sendEnquiry = (listingId, message) => (dispatch, getState, sdk) => 
   dispatch(sendEnquiryRequest());
   const bodyParams = {
     transition: TRANSITION_ENQUIRE,
-    processAlias: config.bookingProcessAlias,
+    processAlias: config.bookingEquipmentProcessAlias,
     params: { listingId },
   };
   return sdk.transactions
@@ -296,9 +296,9 @@ export const sendEnquiry = (listingId, message) => (dispatch, getState, sdk) => 
     });
 };
 
-export const fetchTransactionLineItems = ({ bookingData, listingId, isOwnListing }) => dispatch => {
+export const fetchTransactionEquipmentLineItems = ({ bookingData, listingId, isOwnListing }) => dispatch => {
   dispatch(fetchLineItemsRequest());
-  transactionLineItems({ bookingData, listingId, isOwnListing })
+  transactionEquipmentLineItems({ bookingData, listingId, isOwnListing })
     .then(response => {
       const lineItems = response.data;
       dispatch(fetchLineItemsSuccess(lineItems));
