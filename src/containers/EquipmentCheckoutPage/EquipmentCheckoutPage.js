@@ -52,6 +52,7 @@ import {
   stripeCustomer,
   confirmPayment,
   sendMessage,
+  updateUserMetadata,
 } from './CheckoutPage.duck';
 import { storeData, storedData, clearData } from './CheckoutPageSessionHelpers';
 import css from './CheckoutPage.module.css';
@@ -236,6 +237,7 @@ export class CheckoutPageComponent extends Component {
       onConfirmPayment,
       onSendMessage,
       onSavePaymentMethod,
+      onUpdateUserMetadata,
     } = this.props;
     const {
       pageData,
@@ -340,6 +342,11 @@ export class CheckoutPageComponent extends Component {
       return onConfirmPayment(fnParams);
     };
 
+    const fnChangeUserMetadata = fnParams => {
+      onUpdateUserMetadata('firstTransactionId', fnParams.id.uuid);
+      return fnParams;
+    }
+
     // Step 4: send initial message
     const fnSendMessage = fnParams => {
       return onSendMessage({ ...fnParams, message });
@@ -377,6 +384,7 @@ export class CheckoutPageComponent extends Component {
       fnRequestPayment,
       fnConfirmCardPayment,
       fnConfirmPayment,
+      fnChangeUserMetadata,
       fnSendMessage,
       fnSavePaymentMethod
     );
@@ -396,10 +404,20 @@ export class CheckoutPageComponent extends Component {
         ? { setupPaymentMethodForSaving: true }
         : {};
 
+    const startForFetch = new Date(pageData.bookingDates.bookingStart);
+    const startHour = Number(pageData.bookingDates.bookingStartHour.replace(/[^\d]/g, ''))
+    startForFetch.setHours(startHour);
+
+    const endForFetch = new Date(pageData.bookingDates.bookingEnd);
+    const endHour = Number(pageData.bookingDates.bookingEndHour.replace(/[^\d]/g, ''))
+    endForFetch.setHours(endHour);
+
     const orderParams = {
       listingId: pageData.listing.id,
       bookingStart: tx.booking.attributes.start,
       bookingEnd: tx.booking.attributes.end,
+      displayStart: startForFetch,
+      displayEnd: endForFetch,
       ...optionalPaymentParams,
     };
 
@@ -913,6 +931,7 @@ CheckoutPageComponent.propTypes = {
   onConfirmCardPayment: func.isRequired,
   onRetrievePaymentIntent: func.isRequired,
   onSavePaymentMethod: func.isRequired,
+  onUpdateUserMetadata: func.isRequired,
   onSendMessage: func.isRequired,
   initiateOrderError: propTypes.error,
   confirmPaymentError: propTypes.error,
@@ -978,6 +997,7 @@ const mapDispatchToProps = dispatch => ({
   onSendMessage: params => dispatch(sendMessage(params)),
   onSavePaymentMethod: (stripeCustomer, stripePaymentMethodId) =>
     dispatch(savePaymentMethod(stripeCustomer, stripePaymentMethodId)),
+  onUpdateUserMetadata: (metaKey, value) => dispatch(updateUserMetadata(metaKey, value)),
 });
 
 const EquipmentCheckoutPage = compose(

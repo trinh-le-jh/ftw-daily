@@ -1,6 +1,6 @@
-import pick from 'lodash/pick';
 import config from '../../config';
-import { initiatePrivileged, transitionPrivileged } from '../../util/api';
+import pick from 'lodash/pick';
+import { initiatePrivilegedEquipment, transitionPrivileged } from '../../util/api';
 import { denormalisedResponseEntities } from '../../util/data';
 import { storableError } from '../../util/errors';
 import {
@@ -10,7 +10,11 @@ import {
   isPrivileged,
 } from '../../util/transaction';
 import * as log from '../../util/log';
-import { fetchCurrentUserHasOrdersSuccess, fetchCurrentUser } from '../../ducks/user.duck';
+import {
+  fetchCurrentUserHasOrdersSuccess,
+  fetchCurrentUser,
+  currentUserShowSuccess,
+} from '../../ducks/user.duck';
 
 // ================ Action types ================ //
 
@@ -175,6 +179,9 @@ export const initiateOrder = (orderParams, transactionId) => (dispatch, getState
   const bookingData = {
     startDate: orderParams.bookingStart,
     endDate: orderParams.bookingEnd,
+    // For line item get by hour
+    displayStart: orderParams.displayStart,
+    displayEnd: orderParams.displayEnd,
   };
 
   const bodyParams = isTransition
@@ -226,7 +233,7 @@ export const initiateOrder = (orderParams, transactionId) => (dispatch, getState
       .catch(handleError);
   } else if (isPrivilegedTransition) {
     // initiate privileged
-    return initiatePrivileged({ isSpeculative: false, bookingData, bodyParams, queryParams })
+    return initiatePrivilegedEquipment({ isSpeculative: false, bookingData, bodyParams, queryParams })
       .then(handleSuccess)
       .catch(handleError);
   } else {
@@ -372,7 +379,7 @@ export const speculateTransaction = (orderParams, transactionId) => (dispatch, g
       .catch(handleError);
   } else if (isPrivilegedTransition) {
     // initiate privileged
-    return initiatePrivileged({ isSpeculative: true, bookingData, bodyParams, queryParams })
+    return initiatePrivilegedEquipment({ isSpeculative: true, bookingData, bodyParams, queryParams })
       .then(handleSuccess)
       .catch(handleError);
   } else {
@@ -397,3 +404,40 @@ export const stripeCustomer = () => (dispatch, getState, sdk) => {
       dispatch(stripeCustomerError(storableError(e)));
     });
 };
+
+export const updateUserMetadata = (metaKey, value) => {
+  return (dispatch, getState, sdk) => {
+    const queryParams = {
+      protectedData: {
+        [`${metaKey}`]: value,
+      }
+    };
+
+    return sdk.currentUser
+      .show()
+      .then(response => {
+        const entities = denormalisedResponseEntities(response);
+        if (entities.length !== 1) {
+          throw new Error('Expected a resource in the sdk.currentUser.show response');
+        }
+        return  entities[0];
+      })
+      .then(currentUser => {
+        if (currentUser.attributes.profile.protectedData[`${metaKey}`] === undefined) {
+          return dispatch(updateUserData(queryParams));
+        }
+      })
+      .catch(e => {
+        // Make sure auth info is up-to-date
+        log.error(e, 'fetch-current-user-failed', {});
+      });
+  };
+};
+
+const updateUserData = actionPayload => {
+  return (dispatch, getState, sdk) => {
+    return sdk.currentUser
+      .updateProfile(actionPayload)
+      .catch(e => log.error(e));
+  }
+}

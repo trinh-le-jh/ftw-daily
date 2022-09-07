@@ -1,4 +1,4 @@
-const { transactionLineItems } = require('../api-util/lineItems');
+const { transactionEquipmentLineItems } = require('../api-util/lineItemsEquipment');
 const { getSdk, getTrustedSdk, handleError, serialize } = require('../api-util/sdk');
 
 module.exports = (req, res) => {
@@ -13,7 +13,7 @@ module.exports = (req, res) => {
     .show({ id: listingId })
     .then(listingResponse => {
       const listing = listingResponse.data.data;
-      lineItems = transactionLineItems(listing, bookingData);
+      lineItems = transactionEquipmentLineItems(listing, bookingData);
 
       return getTrustedSdk(req);
     })
