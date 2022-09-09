@@ -46,6 +46,27 @@ export const TRANSITION_CANCEL = 'transition/cancel';
 // The backend will mark the transaction completed.
 export const TRANSITION_COMPLETE = 'transition/complete';
 
+export const TRANSITION_CUSTOMER_CANCEL = 'transition/customer-cancel';
+export const TRANSITION_CUSTOMER_CANCEL_ACCEPT = 'transition/customer-cancel-accept';
+export const TRANSITION_PROVIDER_CANCEL = 'transition/provider-cancel';
+export const TRANSITION_PROVIDER_CANCEL_PASS_48H = 'transition/provider-cancel-pass-48h';
+export const TRANSITION_CUSTOMER_CANCEL_ACCEPT_PASS_48H =
+  'transition/customer-cancel-accept-pass-48h';
+export const TRANSITION_EXPIRE_PASS_48H = 'transition/expire-pass-48h';
+export const TRANSITION_DECLINE_PASS_48H = 'transition/decline-pass-48h';
+export const TRANSITION_CUSTOMER_CANCEL_PASS_48H = 'transition/customer-cancel-pass-48h';
+
+export const TRANSITION_PASS_48H = 'transition/pass-48h';
+export const TRANSITION_ACCEPTED_PASSED_48H = 'transition/accepted-pass-48h';
+
+export const TRANSITION_COMPLETE_PASS_48H = 'transition/complete-pass-48h';
+
+export const TRANSITION_SEND_PAYOUT_DELIVERED = 'transition/send-payout-delivered';
+export const TRANSITION_SEND_PAYOUT_REVIEWED_BY_CUSTOMER =
+  'transition/send-payout-reviewed-by-customer';
+export const TRANSITION_SEND_PAYOUT_REVIEWED_BY_PROVIDER =
+  'transition/send-payout-reviewed-by-provider';
+
 // Reviews are given through transaction transitions. Review 1 can be
 // by provider or customer, and review 2 will be the other party of
 // the transaction.
@@ -94,6 +115,10 @@ const STATE_DECLINED = 'declined';
 const STATE_DECLINED_BY_OPERATOR = 'declined-by-operator';
 const STATE_ACCEPTED = 'accepted';
 const STATE_CANCELED = 'canceled';
+
+const STATE_PASSED_48H = 'passed-48h';
+const STATE_ACCEPTED_PASSED_48H = 'accepted_passed-48h';
+
 const STATE_DELIVERED = 'delivered';
 const STATE_REVIEWED = 'reviewed';
 const STATE_REVIEWED_BY_CUSTOMER = 'reviewed-by-customer';
@@ -145,6 +170,20 @@ const stateDescription = {
         [TRANSITION_DECLINE_BY_OPERATOR]: STATE_DECLINED_BY_OPERATOR,
         [TRANSITION_EXPIRE]: STATE_DECLINED,
         [TRANSITION_ACCEPT]: STATE_ACCEPTED,
+        // new
+        [TRANSITION_CUSTOMER_CANCEL]: STATE_CANCELED,
+        [TRANSITION_PASS_48H]: STATE_PASSED_48H,
+      },
+    },
+    [STATE_PASSED_48H]: {
+      on: {
+        // expire
+        [TRANSITION_EXPIRE_PASS_48H]: STATE_DECLINED,
+        [TRANSITION_DECLINE_PASS_48H]: STATE_DECLINED,
+        // customer cancel
+        [TRANSITION_CUSTOMER_CANCEL_PASS_48H]: STATE_CANCELED,
+        // provider accept
+        [TRANSITION_ACCEPTED_PASSED_48H]: STATE_ACCEPTED_PASSED_48H,
       },
     },
 
@@ -152,17 +191,30 @@ const stateDescription = {
     [STATE_DECLINED_BY_OPERATOR]: {},
     [STATE_ACCEPTED]: {
       on: {
-        [TRANSITION_CANCEL]: STATE_CANCELED,
+        [TRANSITION_PROVIDER_CANCEL]: STATE_CANCELED,
+        [TRANSITION_CUSTOMER_CANCEL_ACCEPT]: STATE_CANCELED,
+
+        [TRANSITION_ACCEPTED_PASSED_48H]: STATE_ACCEPTED_PASSED_48H,
         [TRANSITION_COMPLETE]: STATE_DELIVERED,
       },
     },
 
     [STATE_CANCELED]: {},
+    [STATE_ACCEPTED_PASSED_48H]: {
+      on: {
+        [TRANSITION_PROVIDER_CANCEL_PASS_48H]: STATE_CANCELED,
+        [TRANSITION_CUSTOMER_CANCEL_ACCEPT_PASS_48H]: STATE_CANCELED,
+
+        [TRANSITION_COMPLETE_PASS_48H]: STATE_DELIVERED,
+      },
+    },
+
     [STATE_DELIVERED]: {
       on: {
         [TRANSITION_EXPIRE_REVIEW_PERIOD]: STATE_REVIEWED,
         [TRANSITION_REVIEW_1_BY_CUSTOMER]: STATE_REVIEWED_BY_CUSTOMER,
         [TRANSITION_REVIEW_1_BY_PROVIDER]: STATE_REVIEWED_BY_PROVIDER,
+        [TRANSITION_SEND_PAYOUT_DELIVERED]: STATE_DELIVERED,
       },
     },
 
@@ -170,12 +222,14 @@ const stateDescription = {
       on: {
         [TRANSITION_REVIEW_2_BY_PROVIDER]: STATE_REVIEWED,
         [TRANSITION_EXPIRE_PROVIDER_REVIEW_PERIOD]: STATE_REVIEWED,
+        [TRANSITION_SEND_PAYOUT_REVIEWED_BY_CUSTOMER]: STATE_REVIEWED_BY_CUSTOMER,
       },
     },
     [STATE_REVIEWED_BY_PROVIDER]: {
       on: {
         [TRANSITION_REVIEW_2_BY_CUSTOMER]: STATE_REVIEWED,
         [TRANSITION_EXPIRE_CUSTOMER_REVIEW_PERIOD]: STATE_REVIEWED,
+        [TRANSITION_SEND_PAYOUT_REVIEWED_BY_PROVIDER]: STATE_REVIEWED_BY_PROVIDER,
       },
     },
     [STATE_REVIEWED]: { type: 'final' },
