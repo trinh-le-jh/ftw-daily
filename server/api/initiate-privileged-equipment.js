@@ -2,7 +2,7 @@ const { transactionEquipmentLineItems } = require('../api-util/lineItemsEquipmen
 const { getSdk, getTrustedSdk, handleError, serialize } = require('../api-util/sdk');
 
 module.exports = (req, res) => {
-  const { isSpeculative, bookingData, bodyParams, queryParams } = req.body;
+  const { isSpeculative, bookingData, bodyParams, queryParams, isGetDiscount } = req.body;
 
   const listingId = bodyParams && bodyParams.params ? bodyParams.params.listingId : null;
 
@@ -13,7 +13,7 @@ module.exports = (req, res) => {
     .show({ id: listingId })
     .then(listingResponse => {
       const listing = listingResponse.data.data;
-      lineItems = transactionEquipmentLineItems(listing, bookingData);
+      lineItems = transactionEquipmentLineItems(listing, bookingData, isGetDiscount);
 
       return getTrustedSdk(req);
     })

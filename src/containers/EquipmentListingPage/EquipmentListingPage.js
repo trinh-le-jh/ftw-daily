@@ -41,7 +41,12 @@ import {
 } from '../../components';
 import { TopbarContainer, NotFoundPage } from '../../containers';
 
-import { sendEnquiry, fetchTransactionEquipmentLineItems, setInitialValues } from './EquipmentListingPage.duck';
+import {
+  sendEnquiry,
+  fetchTransactionEquipmentLineItems,
+  setInitialValues,
+  checkTransaction,
+} from './EquipmentListingPage.duck';
 import SectionImages from './SectionImages';
 import SectionHeading from './SectionHeading';
 import SectionGeneral from './SectionGeneral';
@@ -190,6 +195,7 @@ export class EquipmentListingPageComponent extends Component {
       timeSlots,
       fetchTimeSlotsError,
       filterConfig,
+      onCheckTransaction,
       onFetchTransactionLineItems,
       lineItems,
       fetchLineItemsInProgress,
@@ -230,6 +236,33 @@ export class EquipmentListingPageComponent extends Component {
 
     if (shouldShowPublicListingPage) {
       return <NamedRedirect name="ListingPage" params={params} search={location.search} />;
+    }
+
+    const getUserFirstTransactionData = fnParams => {
+      const currentUserFirstTransactionId = currentUser.attributes.profile?.protectedData['firstTransactionId'];
+      if (currentUserFirstTransactionId)
+        return onCheckTransaction(currentUserFirstTransactionId)
+          .then(response => {
+            return {
+              ...fnParams,
+              isGetDiscount: response,
+            }
+          })
+      else return {
+        ...fnParams,
+        isGetDiscount: true,
+      }
+
+    }
+
+    const fetchTransactionLineItems = (value) => {
+      const applyAsync = (acc, val) => acc.then(val);
+      const composeAsync = (...funcs) => x => funcs.reduce(applyAsync, Promise.resolve(x));
+      const handleFetchTransactionLineItems = composeAsync(
+        getUserFirstTransactionData,
+        onFetchTransactionLineItems,
+      );
+      return handleFetchTransactionLineItems(value)
     }
 
     const {
@@ -461,7 +494,7 @@ export class EquipmentListingPageComponent extends Component {
                   onManageDisableScrolling={onManageDisableScrolling}
                   timeSlots={timeSlots}
                   fetchTimeSlotsError={fetchTimeSlotsError}
-                  onFetchTransactionLineItems={onFetchTransactionLineItems}
+                  onFetchTransactionLineItems={fetchTransactionLineItems}
                   lineItems={lineItems}
                   fetchLineItemsInProgress={fetchLineItemsInProgress}
                   fetchLineItemsError={fetchLineItemsError}
@@ -531,6 +564,7 @@ EquipmentListingPageComponent.propTypes = {
   onInitializeCardPaymentData: func.isRequired,
   filterConfig: array,
   onFetchTransactionLineItems: func.isRequired,
+  onCheckTransaction: func.isRequired,
   lineItems: array,
   fetchLineItemsInProgress: bool.isRequired,
   fetchLineItemsError: propTypes.error,
@@ -593,6 +627,7 @@ const mapDispatchToProps = dispatch => ({
   onFetchTransactionLineItems: (bookingData, listingId, isOwnListing) =>
     dispatch(fetchTransactionEquipmentLineItems(bookingData, listingId, isOwnListing)),
   onSendEnquiry: (listingId, message) => dispatch(sendEnquiry(listingId, message)),
+  onCheckTransaction: (transactionId) => dispatch(checkTransaction(transactionId)),
   onInitializeCardPaymentData: () => dispatch(initializeCardPaymentData()),
 });
 

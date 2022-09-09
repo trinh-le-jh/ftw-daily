@@ -4,10 +4,11 @@ import { initiatePrivilegedEquipment, transitionPrivileged } from '../../util/ap
 import { denormalisedResponseEntities } from '../../util/data';
 import { storableError } from '../../util/errors';
 import {
+  isPrivileged,
+  listTransactionToCancelOrDecline,
   TRANSITION_REQUEST_PAYMENT,
   TRANSITION_REQUEST_PAYMENT_AFTER_ENQUIRY,
   TRANSITION_CONFIRM_PAYMENT,
-  isPrivileged,
 } from '../../util/transaction';
 import * as log from '../../util/log';
 import {
@@ -165,6 +166,19 @@ export const stripeCustomerError = e => ({
 
 /* ================ Thunks ================ */
 
+export const checkTransaction = (transactionId) => (dispatch, getState, sdk) => {
+  return sdk.transactions
+    .show({id: transactionId})
+    .then(response => {
+      const transactionData = response.data.data;
+      const lastTransition = transactionData.attributes.lastTransition
+      const isCancelOrDecline = listTransactionToCancelOrDecline.some(
+        transition => transition === lastTransition
+      )
+      return isCancelOrDecline;
+    })
+}
+
 export const initiateOrder = (orderParams, transactionId) => (dispatch, getState, sdk) => {
   dispatch(initiateOrderRequest());
 
@@ -233,7 +247,13 @@ export const initiateOrder = (orderParams, transactionId) => (dispatch, getState
       .catch(handleError);
   } else if (isPrivilegedTransition) {
     // initiate privileged
-    return initiatePrivilegedEquipment({ isSpeculative: false, bookingData, bodyParams, queryParams })
+    return initiatePrivilegedEquipment({
+      isSpeculative: false,
+      bookingData,
+      bodyParams,
+      queryParams,
+      isGetDiscount: orderParams.isGetDiscount
+    })
       .then(handleSuccess)
       .catch(handleError);
   } else {
@@ -379,7 +399,13 @@ export const speculateTransaction = (orderParams, transactionId) => (dispatch, g
       .catch(handleError);
   } else if (isPrivilegedTransition) {
     // initiate privileged
-    return initiatePrivilegedEquipment({ isSpeculative: true, bookingData, bodyParams, queryParams })
+    return initiatePrivilegedEquipment({
+      isSpeculative: true,
+      bookingData,
+      bodyParams,
+      queryParams,
+      isGetDiscount: orderParams.isGetDiscount
+    })
       .then(handleSuccess)
       .catch(handleError);
   } else {
