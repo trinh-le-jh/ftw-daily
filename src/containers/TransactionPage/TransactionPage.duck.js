@@ -12,6 +12,7 @@ import {
   txIsInFirstReviewBy,
   TRANSITION_ACCEPT,
   TRANSITION_DECLINE,
+  isValidCancelTransition,
 } from '../../util/transaction';
 import { transactionLineItems } from '../../util/api';
 import * as log from '../../util/log';
@@ -48,6 +49,10 @@ export const DECLINE_SALE_REQUEST = 'app/TransactionPage/DECLINE_SALE_REQUEST';
 export const DECLINE_SALE_SUCCESS = 'app/TransactionPage/DECLINE_SALE_SUCCESS';
 export const DECLINE_SALE_ERROR = 'app/TransactionPage/DECLINE_SALE_ERROR';
 
+export const CANCEL_SALE_REQUEST = 'app/TransactionPage/CANCEL_SALE_REQUEST';
+export const CANCEL_SALE_SUCCESS = 'app/TransactionPage/CANCEL_SALE_SUCCESS';
+export const CANCEL_SALE_ERROR = 'app/TransactionPage/CANCEL_SALE_ERROR';
+
 export const FETCH_MESSAGES_REQUEST = 'app/TransactionPage/FETCH_MESSAGES_REQUEST';
 export const FETCH_MESSAGES_SUCCESS = 'app/TransactionPage/FETCH_MESSAGES_SUCCESS';
 export const FETCH_MESSAGES_ERROR = 'app/TransactionPage/FETCH_MESSAGES_ERROR';
@@ -78,6 +83,8 @@ const initialState = {
   acceptSaleError: null,
   declineInProgress: false,
   declineSaleError: null,
+  cancelInProgress: false,
+  cancelSaleError: null,
   fetchMessagesInProgress: false,
   fetchMessagesError: null,
   totalMessages: 0,
@@ -147,6 +154,13 @@ export default function checkoutPageReducer(state = initialState, action = {}) {
     case DECLINE_SALE_ERROR:
       return { ...state, declineInProgress: false, declineSaleError: payload };
 
+    case CANCEL_SALE_REQUEST:
+      return { ...state, cancelInProgress: true, cancelSaleError: null};
+    case CANCEL_SALE_SUCCESS:
+      return { ...state, cancelInProgress: false };
+    case CANCEL_SALE_ERROR:
+      return { ...state, cancelInProgress: false, cancelSaleError: payload };
+
     case FETCH_MESSAGES_REQUEST:
       return { ...state, fetchMessagesInProgress: true, fetchMessagesError: null };
     case FETCH_MESSAGES_SUCCESS: {
@@ -210,6 +224,10 @@ export const acceptOrDeclineInProgress = state => {
   return state.TransactionPage.acceptInProgress || state.TransactionPage.declineInProgress;
 };
 
+export const cancelInProgress = state => {
+  return state.TransactionPage.cancelInProgress;
+};
+
 // ================ Action creators ================ //
 export const setInitialValues = initialValues => ({
   type: SET_INITIAL_VALUES,
@@ -237,6 +255,10 @@ const acceptSaleError = e => ({ type: ACCEPT_SALE_ERROR, error: true, payload: e
 const declineSaleRequest = () => ({ type: DECLINE_SALE_REQUEST });
 const declineSaleSuccess = () => ({ type: DECLINE_SALE_SUCCESS });
 const declineSaleError = e => ({ type: DECLINE_SALE_ERROR, error: true, payload: e });
+
+const cancelSaleRequest = () => ({ type: CANCEL_SALE_REQUEST });
+const cancelSaleSuccess = () => ({ type: CANCEL_SALE_SUCCESS });
+const cancelSaleError = e => ({ type: CANCEL_SALE_ERROR, error: true, payload: e });
 
 const fetchMessagesRequest = () => ({ type: FETCH_MESSAGES_REQUEST });
 const fetchMessagesSuccess = (messages, pagination) => ({
@@ -391,6 +413,36 @@ export const declineSale = id => (dispatch, getState, sdk) => {
       log.error(e, 'reject-sale-failed', {
         txId: id,
         transition: TRANSITION_DECLINE,
+      });
+      throw e;
+    });
+};
+
+export const cancelSale = (id, nextTransitionName) => (dispatch, getState, sdk) => {
+  if (!isValidCancelTransition(nextTransitionName)) {
+    return Promise.reject(new Error('Transition is invalid'));
+  }
+  if (cancelInProgress(getState())) {
+    return Promise.reject(new Error('Cancel already in progress'));
+  }
+
+  dispatch(cancelSaleRequest());
+
+  return sdk.transactions
+    .transition({ id, transition: nextTransitionName, params: {} }, { expand: true })
+    .then(response => {
+      dispatch(addMarketplaceEntities(response));
+      dispatch(cancelSaleSuccess());
+      dispatch(fetchCurrentUserNotifications());
+      dispatch(fetchNextTransitions(id));
+
+      return response;
+    })
+    .catch(e => {
+      dispatch(cancelSaleError(storableError(e)));
+      log.error(e, 'cancel-sale-failed', {
+        txId: id,
+        transition: nextTransitionName,
       });
       throw e;
     });

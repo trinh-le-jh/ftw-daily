@@ -235,7 +235,7 @@ export class EquipmentListingPageComponent extends Component {
     const shouldShowPublicListingPage = pendingIsApproved || pendingOtherUsersListing;
 
     if (shouldShowPublicListingPage) {
-      return <NamedRedirect name="ListingPage" params={params} search={location.search} />;
+      return <NamedRedirect name="EquipmentListingPage" params={params} search={location.search} />;
     }
 
     const getUserFirstTransactionData = fnParams => {

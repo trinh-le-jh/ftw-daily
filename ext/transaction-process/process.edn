@@ -50,7 +50,7 @@
   {:name :transition/customer-cancel,
    :actor :actor.role/customer,
    :actions
-   [{:name :action/cancel-booking}
+   [{:name :action/decline-booking}
     {:name :action/calculate-full-refund}
     {:name :action/stripe-refund-payment}],
    :from :state/preauthorized,

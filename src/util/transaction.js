@@ -366,6 +366,12 @@ export const isRelevantPastTransition = transition => {
   return [
     TRANSITION_ACCEPT,
     TRANSITION_CANCEL,
+    TRANSITION_CUSTOMER_CANCEL_ACCEPT_PASS_48H,
+    TRANSITION_CUSTOMER_CANCEL_PASS_48H,
+    TRANSITION_CUSTOMER_CANCEL_ACCEPT,
+    TRANSITION_CUSTOMER_CANCEL,
+    TRANSITION_PROVIDER_CANCEL_PASS_48H,
+    TRANSITION_PROVIDER_CANCEL,
     TRANSITION_COMPLETE,
     TRANSITION_CONFIRM_PAYMENT,
     TRANSITION_DECLINE,
@@ -377,6 +383,19 @@ export const isRelevantPastTransition = transition => {
     TRANSITION_REVIEW_2_BY_PROVIDER,
   ].includes(transition);
 };
+
+export const isValidCancelTransition = transition => {
+  return [
+    // Customer cancel
+    TRANSITION_CUSTOMER_CANCEL_ACCEPT_PASS_48H,
+    TRANSITION_CUSTOMER_CANCEL_PASS_48H,
+    TRANSITION_CUSTOMER_CANCEL_ACCEPT,
+    TRANSITION_CUSTOMER_CANCEL,
+    // Provider cancel
+    TRANSITION_PROVIDER_CANCEL_PASS_48H,
+    TRANSITION_PROVIDER_CANCEL,
+  ].includes(transition);
+}
 
 export const isCustomerReview = transition => {
   return [TRANSITION_REVIEW_1_BY_CUSTOMER, TRANSITION_REVIEW_2_BY_CUSTOMER].includes(transition);
