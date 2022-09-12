@@ -95,7 +95,7 @@
    :to :state/declined}
   {:name :transition/customer-cancel-pass-48h,
    :actor :actor.role/customer,
-   :actions [{:name :action/cancel-booking}],
+   :actions [{:name :action/decline-booking}],
    :from :state/passed-48h,
    :to :state/cancelled}
   {:name :transition/accept,

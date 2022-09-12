@@ -1,4 +1,4 @@
-import React, { Component, useState, memo, useMemo, useEffect } from 'react';
+import React, { Component, useEffect } from 'react';
 import { string, bool, arrayOf, array, func, number } from 'prop-types';
 import { compose } from 'redux';
 import { Form as FinalForm, FormSpy } from 'react-final-form';
@@ -6,16 +6,12 @@ import classNames from 'classnames';
 import moment from 'moment';
 import config from '../../config';
 import { FormattedMessage, intlShape, injectIntl } from '../../util/reactIntl';
-import { required, bookingDatesRequired, composeValidators } from '../../util/validators';
 import { START_DATE, END_DATE } from '../../util/dates';
 import { propTypes } from '../../util/types';
 import { Form, IconSpinner, PrimaryButton, FieldDateRangeInput, FieldDateInput, FieldSelect } from '../../components';
 import EstimatedBreakdownMaybe from './EstimatedBreakdownMaybe';
-
 import css from './BookingDateTimeForm.module.css';
-import { momentObj } from 'react-moment-proptypes';
 import * as validators from '../../util/validators';
-import loginForm from '../LoginForm/LoginForm';
 
 const identity = v => v;
 const ONE_HOUR = 60 * 60 * 1000;
@@ -26,12 +22,16 @@ const END_HOUR= 'bookingEndHour';
 const BOOKING_BY_HOUR = 'hour';
 const BOOKING_BY_DAY = 'day';
 
+const selectOption = Array.from(
+  Array(25),
+  (i, h) => `${h} ${h < 13 ? 'A' : 'P'}M`,
+)
+
 const addTime = (date, time, bonusTime) => {
   return {
     date: time + bonusTime > 24
       ? new Date(date.getTime() + ONE_DAY).getDate()
       : date.getDate(),
-    time: (( time + bonusTime ) % 24) === 0 ? 24 : ( time + bonusTime ) % 24,
   }
 }
 
@@ -184,11 +184,6 @@ export class BookingDateTimeFormComponent extends Component {
             maxTimeUsing,
           } = fieldRenderProps;
 
-          const selectOption = useMemo(() => Array.from(
-              Array(25),
-              (i, index) => `${index} ${index < 13 ? 'AM' : 'PM'}`,
-            )
-            , []);
 
           const {
             formType,
@@ -228,6 +223,9 @@ export class BookingDateTimeFormComponent extends Component {
           });
           const bookingEndLabel = intl.formatMessage({
             id: 'BookingDatesForm.bookingEndTitle',
+          });
+          const formTypeLabel = intl.formatMessage({
+            id: 'BookingDatesForm.bookingTypeLabel',
           });
 
           // This is the place to collect breakdown estimation data.
@@ -336,7 +334,11 @@ export class BookingDateTimeFormComponent extends Component {
           const showDropOff = startDate && bookingStartHour;
 
           return (
-            <Form onSubmit={handleSubmit} className={classes} enforcePagePreloadFor='CheckoutPage'>
+            <Form
+              onSubmit={handleSubmit}
+              className={classes}
+              enforcePagePreloadFor='CheckoutPage'
+            >
               {timeSlotsError}
               <FormSpy
                 subscription={{ values: true }}
@@ -347,7 +349,7 @@ export class BookingDateTimeFormComponent extends Component {
               <FieldSelect
                 id="formType"
                 name="formType"
-                label="Do you want to rent this by the day or by the hour?"
+                label={formTypeLabel}
                 className={css.timeSelector}
               >
                 <option value={BOOKING_BY_HOUR}>By hour</option>
@@ -416,8 +418,7 @@ export class BookingDateTimeFormComponent extends Component {
                     </div>
 
                     {
-                      showDropOff &&
-                      (
+                      showDropOff && (
                         <div className={css.dateTimeRow}>
                           <FieldDateInput
                             className={css.bookingEndDate}

@@ -49,13 +49,21 @@ const EditEquipmentListingGeneralPanel = props => {
         initialValues={{
           title,
           description,
-          type: publicData.type,
-          manufacture: publicData.manufacture,
-          rules: publicData.rules,
+          equipmentType: publicData.equipmentType,
+          manufactureYear: publicData.manufactureYear,
+          numberHour: publicData.numberHour,
+          freePlan: publicData.freePlan || [],
         }}
         saveActionMsg={submitButtonText}
         onSubmit={values => {
-          const { title, description, equipmentType = [], manufactureYear, numberHour } = values;
+          const {
+            title,
+            description,
+            equipmentType = [],
+            manufactureYear,
+            numberHour,
+            freePlan
+          } = values;
           const updateValues = {
             title: title.trim(),
             description,
@@ -66,6 +74,8 @@ const EditEquipmentListingGeneralPanel = props => {
               isEquipment: true,
             },
           };
+          if (freePlan.length)
+            updateValues.publicData.freePlan = freePlan;
           onSubmit(updateValues);
         }}
         onChange={onChange}

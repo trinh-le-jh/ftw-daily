@@ -12,13 +12,18 @@ import {
   yearNumberByNowValid,
   hourNumberValid,
 } from '../../util/validators';
-import { Form, Button, FieldTextInput, FieldCheckboxGroup } from '../../components';
+import {
+  Form,
+  Button,
+  FieldTextInput,
+  FieldCheckboxGroup,
+  MultiTimeSlotSelect
+} from '../../components';
 
 import css from './EditEquipmentListingGeneralForm.module.css';
 import config from '../../config';
 import { findOptionsForSelectFilter } from '../../util/search';
 import arrayMutators from 'final-form-arrays';
-
 const TITLE_MAX_LENGTH = 60;
 const MANUFACTURE_FIELD = 'manufactureYear'
 const NUMBER_HOUR_FIELD = 'numberHour'
@@ -41,6 +46,7 @@ const EditEquipmentListingGeneralFormComponent = props => (
         updateInProgress,
         fetchErrors,
         filterConfig,
+        values,
       } = formRenderProps;
 
       const titleMessage = intl.formatMessage({
@@ -194,6 +200,8 @@ const EditEquipmentListingGeneralFormComponent = props => (
             validate={composeValidators(hourNumberValid(hourErrorMessage))}
             maxLength={2}
           />
+          {/*Equipment pick up and drop off time frame*/}
+          <MultiTimeSlotSelect values={values} intl={intl} />
 
           <Button
             className={css.submitButton}
