@@ -23,6 +23,9 @@ const ONE_DAY = ONE_HOUR * 24;
 const START_HOUR= 'bookingStartHour';
 const END_HOUR= 'bookingEndHour';
 
+const BOOKING_BY_HOUR = 'hour';
+const BOOKING_BY_DAY = 'day';
+
 const addTime = (date, time, bonusTime) => {
   return {
     date: time + bonusTime > 24
@@ -52,19 +55,25 @@ export class BookingDateTimeFormComponent extends Component {
   // focus on that input, otherwise continue with the
   // default handleSubmit function.
   handleFormSubmit(e) {
-    const { startDate, endDate, bookingStartHour, bookingEndHour } = e;
-    if (!startDate) {
+    const { startDate, endDate, bookingStartHour, bookingEndHour, formType, bookingByDay } = e;
+    if (formType === BOOKING_BY_HOUR && !startDate) {
       e.preventDefault();
       this.setState({ focusedInput: START_DATE });
-    } else if (!endDate) {
+    } else if (formType === BOOKING_BY_HOUR && !endDate) {
       e.preventDefault();
       this.setState({ focusedInput: END_DATE });
-    } else if (!bookingStartHour) {
+    } else if (formType === BOOKING_BY_HOUR && !bookingStartHour) {
       e.preventDefault();
       this.setState({ focusedInput: START_HOUR });
-    } else if (!bookingEndHour) {
+    } else if (formType === BOOKING_BY_HOUR && !bookingEndHour) {
       e.preventDefault();
-      this.setState({ focusedInput: END_HOUR });
+      this.setState({focusedInput: END_HOUR});
+    } else if (formType === BOOKING_BY_DAY && !bookingByDay && !bookingByDay.startDate) {
+      e.preventDefault();
+      this.setState({focusedInput: 'BookingByDay.bookingStartDate' })
+    } else if (formType === BOOKING_BY_DAY && !bookingByDay && !bookingByDay.endDate) {
+      e.preventDefault();
+      this.setState({focusedInput: 'BookingByDay.bookingEndDate' })
     } else {
       this.props.onSubmit(e);
     }
@@ -80,21 +89,26 @@ export class BookingDateTimeFormComponent extends Component {
 
     const {
       bookingStartHour,
-      bookingEndHour
+      bookingEndHour,
+      formType,
+      startDate,
+      endDate,
+      bookingByDay,
     } = formValues.values
 
     if (
+      formType === BOOKING_BY_HOUR &&
       formValues.values.startDate &&
       bookingStartHour &&
       formValues.values.endDate &&
-      bookingEndHour && 
+      bookingEndHour &&
       !this.props.fetchLineItemsInProgress
     ) {
 
-      const startDateForFetch = new Date(formValues.values.startDate.date);
+      const startDateForFetch = new Date(startDate.date);
       startDateForFetch.setHours(Number(bookingStartHour.replace(/[^\d]/g, '')));
 
-      const endDateForFetch = new Date(formValues.values.endDate.date);
+      const endDateForFetch = new Date(endDate.date);
       endDateForFetch.setHours(Number(bookingEndHour.replace(/[^\d]/g, '')));
 
       this.props.onFetchTransactionLineItems({
@@ -102,8 +116,17 @@ export class BookingDateTimeFormComponent extends Component {
           startDate: startDateForFetch,
           endDate: endDateForFetch,
           unitType: 'line-item/hour',
-          displayStart: startDateForFetch,
-          displayEnd: endDateForFetch,
+        },
+        listingId,
+        isOwnListing,
+      });
+    }
+    if (formType === BOOKING_BY_DAY && bookingByDay && bookingByDay.startDate && bookingByDay.endDate) {
+      this.props.onFetchTransactionLineItems({
+        bookingData: {
+          startDate: bookingByDay.startDate,
+          endDate: bookingByDay.endDate,
+          unitType: 'line-item/hour',
         },
         listingId,
         isOwnListing,
@@ -139,6 +162,9 @@ export class BookingDateTimeFormComponent extends Component {
         {...rest}
         unitPrice={unitPrice}
         onSubmit={this.handleFormSubmit}
+        initialValues={{
+          formType: BOOKING_BY_HOUR,
+        }}
         render={fieldRenderProps => {
           const {
             endDatePlaceholder,
@@ -165,10 +191,14 @@ export class BookingDateTimeFormComponent extends Component {
             , []);
 
           const {
+            formType,
+            // Value for booking by hour
             startDate,
             endDate,
             bookingStartHour,
-            bookingEndHour
+            bookingEndHour,
+            // Value for booking by day
+            bookingByDay,
           } = values;
 
           const today = moment().startOf('day').toDate();
@@ -193,14 +223,26 @@ export class BookingDateTimeFormComponent extends Component {
               <FormattedMessage id='BookingDatesForm.timeSlotsError' />
             </p>
           ) : null;
+          const bookingStartLabel = intl.formatMessage({
+            id: 'BookingDatesForm.bookingStartTitle',
+          });
+          const bookingEndLabel = intl.formatMessage({
+            id: 'BookingDatesForm.bookingEndTitle',
+          });
 
           // This is the place to collect breakdown estimation data.
           // Note: lineItems are calculated and fetched from FTW backend
           // so we need to pass only booking data that is needed otherwise
           // If you have added new fields to the form that will affect to pricing,
           // you need to add the values to handleOnChange function
-          const bookingData =
-            startDate && bookingStartHour && endDate && bookingEndHour
+
+          const bookingData = (
+            formType === BOOKING_BY_HOUR
+            && startDate
+            && bookingStartHour
+            && endDate
+            && bookingEndHour
+          )
               ? {
                 unitType,
                 startDate: startDate.date,
@@ -208,7 +250,13 @@ export class BookingDateTimeFormComponent extends Component {
                 startHour: bookingStartHour,
                 endHour: bookingEndHour,
               }
-              : null;
+              : formType === BOOKING_BY_DAY && bookingByDay
+                ? {
+                  unitType,
+                  startDate: bookingByDay.startDate,
+                  endDate: bookingByDay.endDate,
+                }
+                : null;
 
           const showEstimatedBreakdown =
             bookingData &&
@@ -234,31 +282,41 @@ export class BookingDateTimeFormComponent extends Component {
               <FormattedMessage id='BookingDatesForm.fetchLineItemsError' />
             </span>
           ) : null;
-          const dateSelected = values['startDate']?.date;
+          const dateSelected = startDate?.date;
 
-
-          const maxBookingDateTime = values['startDate'] && values['bookingStartHour']
+          const maxBookingDateTime = startDate && bookingStartHour
             ? addTime(
                 dateSelected,
-                Number(values['bookingStartHour'].replace(/[^\d]/g, '')),
+                Number(bookingStartHour.replace(/[^\d]/g, '')),
                 maxTimeUsing)
             : undefined;
 
-          const minBookingDateTime = values['startDate'] && values['bookingStartHour']
+          const minBookingDateTime = startDate && bookingStartHour
             ? addTime(
                 dateSelected,
-                Number(values['bookingStartHour'].replace(/[^\d]/g, '')),
+                Number(bookingStartHour.replace(/[^\d]/g, '')),
                 1)
             : undefined;
 
-          const timeSlotsEnd = values['startDate'] && values['bookingStartHour']
-            ? timeSlots.filter((slot) =>
+          const getListTimeSlotsEnd = () => {
+            if (formType === BOOKING_BY_HOUR && startDate && bookingStartHour) {
+              return timeSlots.filter((slot) =>
                 slot.attributes.start.getDate() === minBookingDateTime.date ||
                 slot.attributes.start.getDate() === maxBookingDateTime.date
               )
-            : [];
-          const selectEndOption = values['endDate']
-            ? new Date(values['endDate'].date).getDate() === minBookingDateTime.date
+            }
+            if (formType === BOOKING_BY_DAY && startDate) {
+              return timeSlots.filter(slot =>
+                new Date(slot.attributes.start).getTime() > new Date(startDate.date).getTime()
+              )
+            }
+            return [];
+          };
+
+          const timeSlotsEnd = getListTimeSlotsEnd();
+
+          const selectEndOption = endDate && bookingStartHour
+            ? new Date(endDate.date).getDate() === minBookingDateTime.date
               ? selectOption.slice(
                 minBookingDateTime.time,
                 minBookingDateTime.date === maxBookingDateTime.date
@@ -268,9 +326,14 @@ export class BookingDateTimeFormComponent extends Component {
                 0,
                 maxBookingDateTime.time + 1)
             : [];
+
           useEffect(() => {
             form.change('endDate', null)
-          }, [values.startDate])
+            form.change('bookingStartHour', null)
+            form.change('bookingEndHour', null)
+          }, [values.startDate, values.formType])
+
+          const showDropOff = startDate && bookingStartHour;
 
           return (
             <Form onSubmit={handleSubmit} className={classes} enforcePagePreloadFor='CheckoutPage'>
@@ -281,72 +344,114 @@ export class BookingDateTimeFormComponent extends Component {
                   this.handleOnChange(values);
                 }}
               />
-              <div className={css.dateTimeRow}>
-                <FieldDateInput
-                  className={css.bookingStartDate}
-                  name='startDate'
-                  id='startDate'
-                  useMobileMargins
-                  placeholderText={startDatePlaceholderText}
-                  validate={validators.required('required')}
-                  timeSlots={timeSlots}
-                  label='Start date'
-                />
-
-                <FieldSelect
-                  id='bookingStartHour'
-                  name='bookingStartHour'
-                  label='Pick up time'
-                  disabled={!values['startDate']}
-                  validate={validators.required('required')}
-                  className={css.timeSelector}
-                >
-                  <option value="">Pick a time</option>
-                  {
-                    selectOption
-                      .slice(
-                        values.startDate?.date.getDate() === new Date().getUTCDate()
-                          ? new Date().getUTCHours() + 1
-                          : 0
-                        , selectOption.length - 1)
-                      .map(opt => (
-                        <option value={opt} key={`${opt}-start`}>{opt}</option>
-                      ))
-                  }
-                </FieldSelect>
-              </div>
+              <FieldSelect
+                id="formType"
+                name="formType"
+                label="Do you want to rent this by the day or by the hour?"
+                className={css.timeSelector}
+              >
+                <option value={BOOKING_BY_HOUR}>By hour</option>
+                <option value={BOOKING_BY_DAY}>By day</option>
+              </FieldSelect>
+              <br/>
 
               {
-                values['startDate'] && values['bookingStartHour'] &&
-                (
-                  <div className={css.dateTimeRow}>
-                    <FieldDateInput
-                      className={css.bookingEndDate}
-                      name='endDate'
-                      id='endDate'
-                      useMobileMargins
-                      placeholderText={endDatePlaceholderText}
-                      timeSlots={timeSlotsEnd}
-                      label='End date'
-                      validate={validators.required('required')}
-                    />
+                formType === BOOKING_BY_DAY && (
+                  <FieldDateRangeInput
+                    className={css.bookingDates}
+                    name="bookingByDay"
+                    unitType={unitType}
+                    startDateId="BookingByDay.bookingStartDate"
+                    startDateLabel={bookingStartLabel}
+                    startDatePlaceholderText={startDatePlaceholderText}
+                    endDateId="BookingByDay.bookingEndDate"
+                    endDateLabel={bookingEndLabel}
+                    endDatePlaceholderText={endDatePlaceholderText}
+                    focusedInput={this.state.focusedInput}
+                    onFocusedInputChange={this.onFocusedInputChange}
+                    format={identity}
+                    timeSlots={timeSlots}
+                    useMobileMargins
+                    disabled={fetchLineItemsInProgress}
+                  />
+                )
+              }
 
-                    <FieldSelect
-                      className={css.timeSelector}
-                      id='bookingEndHour'
-                      name='bookingEndHour'
-                      label='Drop off time'
-                      disabled={!values['endDate']}
-                      validate={validators.required('required')}
-                    >
-                      <option value="">Pick a time</option>
-                      {
-                        selectEndOption.map(opt => (
-                          <option value={opt} key={`${opt}-end`}>{opt}</option>
-                        ))
-                      }
-                    </FieldSelect>
-                  </div>
+              {
+                formType === BOOKING_BY_HOUR && (
+                  <>
+                    <div className={css.dateTimeRow}>
+                      <FieldDateInput
+                        className={css.bookingStartDate}
+                        name="startDate"
+                        id="startDate"
+                        useMobileMargins
+                        placeholderText={startDatePlaceholderText}
+                        validate={validators.required('required')}
+                        timeSlots={timeSlots}
+                        label='Start date'
+                      />
+
+                      <FieldSelect
+                        id={START_HOUR}
+                        name={START_HOUR}
+                        label="Pick up time"
+                        disabled={!values['startDate']}
+                        validate={validators.required('required')}
+                        className={css.timeSelector}
+                      >
+                        <option value="">Pick a time</option>
+                        {
+                          selectOption
+                            .slice(
+                              values.startDate?.date.getDate() === new Date().getUTCDate()
+                                ? new Date().getUTCHours() + 1
+                                : 0
+                              , selectOption.length - 1)
+                            .map(opt => (
+                              <option value={opt} key={`${opt}-start`}>{opt}</option>
+                            ))
+                        }
+                      </FieldSelect>
+                    </div>
+
+                    {
+                      showDropOff &&
+                      (
+                        <div className={css.dateTimeRow}>
+                          <FieldDateInput
+                            className={css.bookingEndDate}
+                            name="endDate"
+                            id="endDate"
+                            useMobileMargins
+                            placeholderText={endDatePlaceholderText}
+                            timeSlots={timeSlotsEnd}
+                            label="End date"
+                            validate={validators.required('required')}
+                          />
+                          {
+                            formType === BOOKING_BY_HOUR && (
+                              <FieldSelect
+                                className={css.timeSelector}
+                                id="bookingEndHour"
+                                name="bookingEndHour"
+                                label="Drop off time"
+                                disabled={!values['endDate']}
+                                validate={validators.required('required')}
+                              >
+                                <option value="">Pick a time</option>
+                                {
+                                  selectEndOption.map(opt => (
+                                    <option value={opt} key={`${opt}-end`}>{opt}</option>
+                                  ))
+                                }
+                              </FieldSelect>
+                            )
+                          }
+                        </div>
+                      )
+                    }
+                  </>
                 )
               }
 
@@ -364,8 +469,8 @@ export class BookingDateTimeFormComponent extends Component {
                 />
               </p>
               <div className={submitButtonClasses}>
-                <PrimaryButton type='submit'>
-                  <FormattedMessage id='BookingDatesForm.requestToBook' />
+                <PrimaryButton type="submit">
+                  <FormattedMessage id="BookingDatesForm.requestToBook" />
                 </PrimaryButton>
               </div>
             </Form>

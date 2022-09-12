@@ -30,7 +30,7 @@ const CUSTOMER_COMMISSION_PERCENTAGE = 55; // Customer commission is positive
  */
 exports.transactionEquipmentLineItems = (listing, bookingData, isFirstTime = false) => {
   const unitPrice = listing.attributes.price;
-  const { displayStart, displayEnd } = bookingData;
+  const { startDate, endDate } = bookingData;
 
   /**
    * If you want to use pre-defined component and translations for printing the lineItems base price for booking,
@@ -46,8 +46,8 @@ exports.transactionEquipmentLineItems = (listing, bookingData, isFirstTime = fal
     code: 'line-item/hour',
     unitPrice,
     quantity: calculateQuantityFromDates(
-      displayStart,
-      displayEnd,
+      startDate,
+      endDate,
       'line-item/hour'),
     includeFor: ['customer', 'provider'],
   };

@@ -98,7 +98,8 @@ export class EquipmentListingPageComponent extends Component {
     const listingId = new UUID(params.id);
     const listing = getListing(listingId);
 
-    const { startDate, endDate, bookingStartHour, bookingEndHour } = values;
+    const { startDate, endDate, bookingStartHour, bookingEndHour, formType, bookingByDay } = values;
+
 
     const initialValues = {
       listing,
@@ -108,8 +109,8 @@ export class EquipmentListingPageComponent extends Component {
         unitType: 'line-item/hour'
       },
       bookingDates: {
-        bookingStart: startDate.date,
-        bookingEnd: endDate.date,
+        bookingStart: formType === 'hour' ? startDate.date : bookingByDay.startDate,
+        bookingEnd: formType === 'hour' ? endDate.date : bookingByDay.endDate,
         bookingStartHour,
         bookingEndHour,
       },

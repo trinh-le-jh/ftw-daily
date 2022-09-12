@@ -204,15 +204,17 @@ export class CheckoutPageComponent extends Component {
         const oneDateTime = 60 * 60 * 1000 *24;
 
         const dateStart = new Date(bookingStart);
-        const dateEnd = new Date(dateStart.getTime() + oneDateTime);
+        const dateEnd = bookingStart === bookingEnd
+          ? new Date(dateStart.getTime() + oneDateTime)
+          : bookingEnd;
 
         const displayStart = new Date(bookingStart);
-        displayStart.setHours(
+        pageData.bookingDates.bookingStartHour && displayStart.setHours(
           Number(pageData.bookingDates.bookingStartHour.replace(/[^\d]/g, ''))
         )
 
         const displayEnd = new Date(bookingEnd);
-        displayEnd.setHours(
+        pageData.bookingDates.bookingEndHour && displayEnd.setHours(
           Number(pageData.bookingDates.bookingEndHour.replace(/[^\d]/g, ''))
         )
 
@@ -470,12 +472,14 @@ export class CheckoutPageComponent extends Component {
         : {};
 
     const startForFetch = new Date(pageData.bookingDates.bookingStart);
-    const startHour = Number(pageData.bookingDates.bookingStartHour.replace(/[^\d]/g, ''))
-    startForFetch.setHours(startHour);
+    const startHour = pageData.bookingDates.bookingStartHour &&
+      Number(pageData.bookingDates.bookingStartHour.replace(/[^\d]/g, ''))
+    pageData.bookingDates.bookingStartHour && startForFetch.setHours(startHour);
 
     const endForFetch = new Date(pageData.bookingDates.bookingEnd);
-    const endHour = Number(pageData.bookingDates.bookingEndHour.replace(/[^\d]/g, ''))
-    endForFetch.setHours(endHour);
+    const endHour = pageData.bookingDates.bookingEndHour &&
+      Number(pageData.bookingDates.bookingEndHour.replace(/[^\d]/g, ''))
+    pageData.bookingDates.bookingEndHour && endForFetch.setHours(endHour);
 
     const orderParams = {
       listingId: pageData.listing.id,

@@ -15,6 +15,13 @@
     margin-bottom: 38px;
   }
 }
+.bookingDates {
+  flex-shrink: 0;
+  margin-bottom: 38px;
+
+  /* Ensure that calendar dropdown gets some stacking context relative to other form items below */
+  z-index: 1;
+}
 .bookingEndDate {
   flex-shrink: 0;
   margin-bottom: 16px;
