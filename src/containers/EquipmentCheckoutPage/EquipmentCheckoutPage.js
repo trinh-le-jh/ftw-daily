@@ -52,6 +52,8 @@ import {
   stripeCustomer,
   confirmPayment,
   sendMessage,
+  updateUserMetadata,
+  checkTransaction,
 } from './CheckoutPage.duck';
 import { storeData, storedData, clearData } from './CheckoutPageSessionHelpers';
 import css from './CheckoutPage.module.css';
@@ -140,8 +142,10 @@ export class CheckoutPageComponent extends Component {
       listing,
       transaction,
       fetchSpeculatedTransaction,
+      onCheckTransaction,
       fetchStripeCustomer,
       history,
+      currentUser,
     } = this.props;
 
     // Fetch currentUser with stripeCustomer entity
@@ -161,10 +165,14 @@ export class CheckoutPageComponent extends Component {
       storeData(bookingData, bookingDates, listing, transaction, STORAGE_KEY);
     }
 
+
     // NOTE: stored data can be empty if user has already successfully completed transaction.
     const pageData = hasDataInProps
       ? { bookingData, bookingDates, listing, transaction }
       : storedData(STORAGE_KEY);
+
+    const currentUserFirstTransactionId =
+      currentUser.attributes.profile.protectedData['firstTransactionId'];
 
     // Check if a booking is already created according to stored data.
     const tx = pageData ? pageData.transaction : null;
@@ -187,8 +195,6 @@ export class CheckoutPageComponent extends Component {
 
       // Convert picked date to date that will be converted on the API as
       // a noon of correct year-month-date combo in UTC
-      const bookingStartForAPI = dateFromLocalToAPI(bookingStart);
-      const bookingEndForAPI = dateFromLocalToAPI(bookingEnd);
 
       // Fetch speculated transaction for showing price in booking breakdown
       // NOTE: if unit type is line-item/units, quantity needs to be added.
@@ -198,30 +204,51 @@ export class CheckoutPageComponent extends Component {
         const oneDateTime = 60 * 60 * 1000 *24;
 
         const dateStart = new Date(bookingStart);
-        const dateEnd = new Date(dateStart.getTime() + oneDateTime);
+        const dateEnd = bookingStart.getTime() === bookingEnd.getTime()
+          ? new Date(dateStart.getTime() + oneDateTime)
+          : bookingEnd;
 
         const displayStart = new Date(bookingStart);
-        displayStart.setHours(
+        pageData.bookingDates.bookingStartHour && displayStart.setHours(
           Number(pageData.bookingDates.bookingStartHour.replace(/[^\d]/g, ''))
         )
 
         const displayEnd = new Date(bookingEnd);
-        displayEnd.setHours(
+        pageData.bookingDates.bookingEndHour && displayEnd.setHours(
           Number(pageData.bookingDates.bookingEndHour.replace(/[^\d]/g, ''))
         )
 
-        fetchSpeculatedTransaction(
-          {
-            listingId,
-            bookingStart: dateStart,
-            bookingEnd: dateEnd,
+        if (currentUserFirstTransactionId) {
+          onCheckTransaction(currentUserFirstTransactionId)
+            .then(response => {
+              fetchSpeculatedTransaction(
+                {
+                  listingId,
+                  bookingStart: dateStart,
+                  bookingEnd: dateEnd,
 
-            displayStart: displayStart,
-            displayEnd: displayEnd,
-            unitType: 'line-item/hour',
-          },
-          transactionId
-        );
+                  displayStart: displayStart,
+                  displayEnd: displayEnd,
+                  unitType: 'line-item/hour',
+                  isGetDiscount: response,
+                },
+                transactionId,
+              );
+            })
+        } else
+          fetchSpeculatedTransaction(
+            {
+              listingId,
+              bookingStart: dateStart,
+              bookingEnd: dateEnd,
+
+              displayStart: displayStart,
+              displayEnd: displayEnd,
+              unitType: 'line-item/hour',
+              isGetDiscount: true,
+            },
+            transactionId,
+          );
       }
       this.setState({ pageData: pageData || {}, dataLoaded: true });
     }
@@ -232,10 +259,12 @@ export class CheckoutPageComponent extends Component {
       currentUser,
       stripeCustomerFetched,
       onInitiateOrder,
+      onCheckTransaction,
       onConfirmCardPayment,
       onConfirmPayment,
       onSendMessage,
       onSavePaymentMethod,
+      onUpdateUserMetadata,
     } = this.props;
     const {
       pageData,
@@ -247,6 +276,7 @@ export class CheckoutPageComponent extends Component {
     } = handlePaymentParams;
     const storedTx = ensureTransaction(pageData.transaction);
 
+    const currentUserFirstTransactionId = currentUser.attributes.profile?.protectedData['firstTransactionId'];
     const ensuredCurrentUser = ensureCurrentUser(currentUser);
     const ensuredStripeCustomer = ensureStripeCustomer(ensuredCurrentUser.stripeCustomer);
     const ensuredDefaultPaymentMethod = ensurePaymentMethodCard(
@@ -266,6 +296,22 @@ export class CheckoutPageComponent extends Component {
 
     const selectedPaymentFlow = paymentFlow(selectedPaymentMethod, saveAfterOnetimePayment);
 
+    // Step 0: check user can have discount for first transaction
+    const fnCheckTransaction = fnParams => {
+      if(currentUserFirstTransactionId)
+        return onCheckTransaction(currentUserFirstTransactionId)
+          .then(response => {
+            return {
+              ...fnParams,
+              isGetDiscount: response,
+            }
+          })
+      else return {
+        ...fnParams,
+        isGetDiscount: true
+      };
+    };
+
     // Step 1: initiate order by requesting payment from Marketplace API
     const fnRequestPayment = fnParams => {
       // fnParams should be { listingId, bookingStart, bookingEnd }
@@ -273,7 +319,14 @@ export class CheckoutPageComponent extends Component {
         storedTx.attributes.protectedData && storedTx.attributes.protectedData.stripePaymentIntents;
 
       // If paymentIntent exists, order has been initiated previously.
-      return hasPaymentIntents ? Promise.resolve(storedTx) : onInitiateOrder(fnParams, storedTx.id);
+      return hasPaymentIntents
+        ? Promise.resolve(storedTx)
+        : onInitiateOrder(fnParams, storedTx.id).then(respones => {
+          return {
+            ...respones,
+            isGetDiscount: fnParams.isGetDiscount,
+          }
+        });
     };
 
     // Step 2: pay using Stripe SDK
@@ -330,15 +383,35 @@ export class CheckoutPageComponent extends Component {
         paymentIntent && STRIPE_PI_USER_ACTIONS_DONE_STATUSES.includes(paymentIntent.status);
       return hasPaymentIntentUserActionsDone
         ? Promise.resolve({ transactionId: order.id, paymentIntent })
-        : onConfirmCardPayment(params);
+        : onConfirmCardPayment(params).then(response => {
+          return {
+            ...response,
+            isGetDiscount: fnParams.isGetDiscount,
+          }
+        });
     };
 
     // Step 3: complete order by confirming payment to Marketplace API
     // Parameter should contain { paymentIntent, transactionId } returned in step 2
     const fnConfirmPayment = fnParams => {
       createdPaymentIntent = fnParams.paymentIntent;
-      return onConfirmPayment(fnParams);
+      return onConfirmPayment(fnParams).then(response => {
+        return {
+          ...response,
+          isGetDiscount: fnParams.isGetDiscount,
+        }
+      });
     };
+
+    // Step 3.5: set user first transaction id
+    const fnChangeUserFirstTransaction = fnParams => {
+      if (!fnParams.isGetDiscount) return fnParams;
+
+      return onUpdateUserMetadata('firstTransactionId', fnParams.id.uuid)
+        .then(() => {
+          return fnParams
+        });
+    }
 
     // Step 4: send initial message
     const fnSendMessage = fnParams => {
@@ -374,9 +447,11 @@ export class CheckoutPageComponent extends Component {
     const applyAsync = (acc, val) => acc.then(val);
     const composeAsync = (...funcs) => x => funcs.reduce(applyAsync, Promise.resolve(x));
     const handlePaymentIntentCreation = composeAsync(
+      fnCheckTransaction,
       fnRequestPayment,
       fnConfirmCardPayment,
       fnConfirmPayment,
+      fnChangeUserFirstTransaction,
       fnSendMessage,
       fnSavePaymentMethod
     );
@@ -396,10 +471,22 @@ export class CheckoutPageComponent extends Component {
         ? { setupPaymentMethodForSaving: true }
         : {};
 
+    const startForFetch = new Date(pageData.bookingDates.bookingStart);
+    const startHour = pageData.bookingDates.bookingStartHour &&
+      Number(pageData.bookingDates.bookingStartHour.replace(/[^\d]/g, ''))
+    pageData.bookingDates.bookingStartHour && startForFetch.setHours(startHour);
+
+    const endForFetch = new Date(pageData.bookingDates.bookingEnd);
+    const endHour = pageData.bookingDates.bookingEndHour &&
+      Number(pageData.bookingDates.bookingEndHour.replace(/[^\d]/g, ''))
+    pageData.bookingDates.bookingEndHour && endForFetch.setHours(endHour);
+
     const orderParams = {
       listingId: pageData.listing.id,
       bookingStart: tx.booking.attributes.start,
       bookingEnd: tx.booking.attributes.end,
+      displayStart: startForFetch,
+      displayEnd: endForFetch,
       ...optionalPaymentParams,
     };
 
@@ -910,9 +997,11 @@ CheckoutPageComponent.propTypes = {
   }).isRequired,
   onConfirmPayment: func.isRequired,
   onInitiateOrder: func.isRequired,
+  onCheckTransaction: func.isRequired,
   onConfirmCardPayment: func.isRequired,
   onRetrievePaymentIntent: func.isRequired,
   onSavePaymentMethod: func.isRequired,
+  onUpdateUserMetadata: func.isRequired,
   onSendMessage: func.isRequired,
   initiateOrderError: propTypes.error,
   confirmPaymentError: propTypes.error,
@@ -972,12 +1061,14 @@ const mapDispatchToProps = dispatch => ({
     dispatch(speculateTransaction(params, transactionId)),
   fetchStripeCustomer: () => dispatch(stripeCustomer()),
   onInitiateOrder: (params, transactionId) => dispatch(initiateOrder(params, transactionId)),
+  onCheckTransaction: (transactionId) => dispatch(checkTransaction(transactionId)),
   onRetrievePaymentIntent: params => dispatch(retrievePaymentIntent(params)),
   onConfirmCardPayment: params => dispatch(confirmCardPayment(params)),
   onConfirmPayment: params => dispatch(confirmPayment(params)),
   onSendMessage: params => dispatch(sendMessage(params)),
   onSavePaymentMethod: (stripeCustomer, stripePaymentMethodId) =>
     dispatch(savePaymentMethod(stripeCustomer, stripePaymentMethodId)),
+  onUpdateUserMetadata: (metaKey, value) => dispatch(updateUserMetadata(metaKey, value)),
 });
 
 const EquipmentCheckoutPage = compose(

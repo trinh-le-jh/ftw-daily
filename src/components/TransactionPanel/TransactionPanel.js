@@ -27,6 +27,7 @@ import {
   BookingPanel,
   NamedLink,
   ReviewModal,
+  SecondaryButton,
   UserDisplayName,
 } from '../../components';
 import { SendMessageForm } from '../../forms';
@@ -183,8 +184,10 @@ export class TransactionPanelComponent extends Component {
       intl,
       onAcceptSale,
       onDeclineSale,
+      onCancelSale,
       acceptInProgress,
       declineInProgress,
+      cancelInProgress,
       acceptSaleError,
       declineSaleError,
       onSubmitBookingRequest,
@@ -196,6 +199,8 @@ export class TransactionPanelComponent extends Component {
       fetchLineItemsInProgress,
       fetchLineItemsError,
     } = this.props;
+
+    const cancelTransitionMaybe = `${transactionRole}-cancel`;
 
     const currentTransaction = ensureTransaction(transaction);
     const currentListing = ensureListing(currentTransaction.listing);
@@ -241,12 +246,18 @@ export class TransactionPanelComponent extends Component {
           headingState: HEADING_REQUESTED,
           showDetailCardHeadings: isCustomer,
           showSaleButtons: isProvider && !isCustomerBanned,
+          showCancelButton: !isCustomerBanned && nextTransitions.some(
+            transition => transition.attributes.name.search(cancelTransitionMaybe) !== -1
+          ),
         };
       } else if (txIsAccepted(tx)) {
         return {
           headingState: HEADING_ACCEPTED,
           showDetailCardHeadings: isCustomer,
           showAddress: isCustomer,
+          showCancelButton: !isCustomerBanned && nextTransitions.some(
+            transition => transition.attributes.name.search(cancelTransitionMaybe) !== -1
+          ),
         };
       } else if (txIsDeclined(tx)) {
         return {
@@ -317,6 +328,29 @@ export class TransactionPanelComponent extends Component {
       />
     );
 
+    const onCancelTransaction = () => {
+      const nextTransition = nextTransitions.find(transition =>
+        transition.attributes.name.search(cancelTransitionMaybe) !== -1
+      );
+
+      if (nextTransition)
+        // Heading to function cancelSale in TransactionPage.duck.js
+        onCancelSale(currentTransaction.id, nextTransition.attributes.name)
+    };
+
+    const cancelButtonMaybe = (
+      <div className={css.actionButtonWrapper}>
+        <div className={css.actionButtons}>
+          <SecondaryButton
+            inProgress={cancelInProgress}
+            onClick={onCancelTransaction}
+          >
+            <FormattedMessage id="TransactionPanel.cancelButton" />
+          </SecondaryButton>
+        </div>
+      </div>
+    );
+
     const showSendMessageForm =
       !isCustomerBanned && !isCustomerDeleted && !isProviderBanned && !isProviderDeleted;
 
@@ -364,6 +398,7 @@ export class TransactionPanelComponent extends Component {
               listingId={currentListing.id && currentListing.id.uuid}
               listingTitle={listingTitle}
               listingDeleted={listingDeleted}
+              isEquipment={currentListing.attributes.publicData.isEquipment}
             />
 
             <div className={css.bookingDetailsMobile}>
@@ -411,6 +446,9 @@ export class TransactionPanelComponent extends Component {
             ) : (
               <div className={css.sendingMessageNotAllowed}>{sendingMessageNotAllowed}</div>
             )}
+            <div className={css.mobileActionButtons}>
+              {stateData.showCancelButton && onCancelSale && cancelButtonMaybe}
+            </div>
 
             {stateData.showSaleButtons ? (
               <div className={css.mobileActionButtons}>{saleButtons}</div>
@@ -463,6 +501,9 @@ export class TransactionPanelComponent extends Component {
               {stateData.showSaleButtons ? (
                 <div className={css.desktopActionButtons}>{saleButtons}</div>
               ) : null}
+              <div className={css.desktopActionButtons}>
+                {stateData.showCancelButton && onCancelSale && cancelButtonMaybe}
+              </div>
             </div>
           </div>
         </div>
@@ -529,8 +570,10 @@ TransactionPanelComponent.propTypes = {
   // Sale related props
   onAcceptSale: func.isRequired,
   onDeclineSale: func.isRequired,
+  onCancelSale: func,
   acceptInProgress: bool.isRequired,
   declineInProgress: bool.isRequired,
+  cancelInProgress: bool.isRequired,
   acceptSaleError: propTypes.error,
   declineSaleError: propTypes.error,
 

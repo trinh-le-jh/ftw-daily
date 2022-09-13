@@ -39,6 +39,65 @@
    :actions [{:name :action/stripe-confirm-payment-intent}],
    :from :state/pending-payment,
    :to :state/preauthorized}
+  {:name :transition/pass-48h,
+   :at
+   {:fn/plus
+    [{:fn/timepoint [:time/first-entered-state :state/pending-payment]}
+     {:fn/period ["P2D"]}]},
+   :actions [],
+   :from :state/preauthorized,
+   :to :state/passed-48h}
+  {:name :transition/customer-cancel,
+   :actor :actor.role/customer,
+   :actions
+   [{:name :action/decline-booking}
+    {:name :action/calculate-full-refund}
+    {:name :action/stripe-refund-payment}],
+   :from :state/preauthorized,
+   :to :state/cancelled}
+  {:name :transition/customer-cancel-accept,
+   :actor :actor.role/customer,
+   :actions
+   [{:name :action/cancel-booking}
+    {:name :action/calculate-full-refund}
+    {:name :action/stripe-refund-payment}],
+   :from :state/accepted,
+   :to :state/cancelled}
+  {:name :transition/provider-cancel,
+   :actor :actor.role/provider,
+   :actions
+   [{:name :action/cancel-booking}
+    {:name :action/calculate-full-refund}
+    {:name :action/stripe-refund-payment}],
+   :from :state/accepted,
+   :to :state/cancelled}
+  {:name :transition/expire-pass-48h,
+   :at
+   {:fn/min
+    [{:fn/plus
+      [{:fn/timepoint [:time/first-entered-state :state/preauthorized]}
+       {:fn/period ["P6D"]}]}
+     {:fn/plus
+      [{:fn/timepoint [:time/booking-end]} {:fn/period ["P1D"]}]}]},
+   :actions
+   [{:name :action/decline-booking}
+    {:name :action/calculate-full-refund}
+    {:name :action/stripe-refund-payment}],
+   :from :state/passed-48h,
+   :to :state/declined}
+  {:name :transition/decline-pass-48h,
+   :actor :actor.role/provider,
+   :actions
+   [{:name :action/decline-booking}
+    {:name :action/calculate-full-refund}
+    {:name :action/stripe-refund-payment}],
+   :from :state/passed-48h,
+   :to :state/declined}
+  {:name :transition/customer-cancel-pass-48h,
+   :actor :actor.role/customer,
+   :actions [{:name :action/decline-booking}],
+   :from :state/passed-48h,
+   :to :state/cancelled}
   {:name :transition/accept,
    :actor :actor.role/provider,
    :actions
@@ -46,6 +105,32 @@
     {:name :action/stripe-capture-payment-intent}],
    :from :state/preauthorized,
    :to :state/accepted}
+  {:name :transition/accept-pass-48h,
+   :at
+   {:fn/plus
+    [{:fn/timepoint [:time/first-entered-state :state/pending-payment]}
+     {:fn/period ["P2D"]}]},
+   :actions [],
+   :from :state/accepted,
+   :to :state/accepted-passed-48h}
+  {:name :transition/provider-cancel-pass-48h,
+   :actor :actor.role/provider,
+   :actions
+   [{:name :action/cancel-booking}
+    {:name :action/calculate-full-refund}
+    {:name :action/stripe-refund-payment}],
+   :from :state/accepted-passed-48h,
+   :to :state/cancelled}
+  {:name :transition/customer-cancel-accept-pass-48h,
+   :actor :actor.role/customer,
+   :actions [{:name :action/cancel-booking}],
+   :from :state/accepted-passed-48h,
+   :to :state/cancelled}
+  {:name :transition/complete-pass-48h,
+   :at {:fn/timepoint [:time/booking-end]},
+   :actions [],
+   :from :state/accepted-passed-48h,
+   :to :state/delivered}
   {:name :transition/decline,
    :actor :actor.role/provider,
    :actions
@@ -70,7 +155,7 @@
    :to :state/declined}
   {:name :transition/complete,
    :at {:fn/timepoint [:time/booking-end]},
-   :actions [{:name :action/stripe-create-payout}],
+   :actions [],
    :from :state/accepted,
    :to :state/delivered}
   {:name :transition/cancel,
@@ -81,6 +166,14 @@
     {:name :action/stripe-refund-payment}],
    :from :state/accepted,
    :to :state/cancelled}
+  {:name :transition/decline-preauthorized-by-operator,
+   :actor :actor.role/operator,
+   :actions
+   [{:name :action/decline-booking}
+    {:name :action/calculate-full-refund}
+    {:name :action/stripe-refund-payment}],
+   :from :state/preauthorized,
+   :to :state/declined-by-operator}
   {:name :transition/review-1-by-provider,
    :actor :actor.role/provider,
    :actions [{:name :action/post-review-by-provider}],
@@ -125,6 +218,38 @@
     [{:fn/timepoint [:time/booking-end]} {:fn/period ["P7D"]}]},
    :actions [{:name :action/publish-reviews}],
    :from :state/reviewed-by-provider,
+   :to :state/reviewed}
+  {:name :transition/send-payout-delivered
+   :at
+   {:fn/plus
+    [{:fn/timepoint [:time/booking-end]}
+     {:fn/period ["P3D"]}]},
+   :actions [{:name :action/stripe-create-payout}],
+   :from :state/delivered,
+   :to :state/delivered}
+  {:name :transition/send-payout-reviewed-by-customer
+   :at
+   {:fn/plus
+    [{:fn/timepoint [:time/booking-end]}
+     {:fn/period ["P3D"]}]},
+   :actions [{:name :action/stripe-create-payout}],
+   :from :state/reviewed-by-customer,
+   :to :state/reviewed-by-customer}
+  {:name :transition/send-payout-reviewed-by-provider
+   :at
+   {:fn/plus
+    [{:fn/timepoint [:time/booking-end]}
+     {:fn/period ["P3D"]}]},
+   :actions [{:name :action/stripe-create-payout}],
+   :from :state/reviewed-by-provider,
+   :to :state/reviewed-by-provider}
+  {:name :transition/send-payout-reviewed
+   :at
+   {:fn/plus
+    [{:fn/timepoint [:time/booking-end]}
+     {:fn/period ["P3D"]}]},
+   :actions [{:name :action/stripe-create-payout}],
+   :from :state/reviewed,
    :to :state/reviewed}],
  :notifications
  [{:name :notification/new-booking-request,

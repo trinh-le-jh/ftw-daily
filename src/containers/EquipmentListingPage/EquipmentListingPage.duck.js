@@ -4,10 +4,13 @@ import config from '../../config';
 import { types as sdkTypes } from '../../util/sdkLoader';
 import { storableError } from '../../util/errors';
 import { addMarketplaceEntities } from '../../ducks/marketplaceData.duck';
-import { transactionLineItems } from '../../util/api';
+import { transactionEquipmentLineItems } from '../../util/api';
 import * as log from '../../util/log';
 import { denormalisedResponseEntities } from '../../util/data';
-import { TRANSITION_ENQUIRE } from '../../util/transaction';
+import {
+  listTransactionToCancelOrDecline,
+  TRANSITION_ENQUIRE,
+} from '../../util/transaction';
 import {
   LISTING_PAGE_DRAFT_VARIANT,
   LISTING_PAGE_PENDING_APPROVAL_VARIANT,
@@ -271,11 +274,26 @@ export const fetchTimeSlots = listingId => (dispatch, getState, sdk) => {
     });
 };
 
+
+
+export const checkTransaction = (transactionId) => (dispatch, getState, sdk) => {
+  return sdk.transactions
+    .show({id: transactionId})
+    .then(response => {
+      const transactionData = response.data.data;
+      const lastTransition = transactionData.attributes.lastTransition
+      const isCancelOrDecline = listTransactionToCancelOrDecline.some(
+        transition => transition === lastTransition
+      )
+      return isCancelOrDecline;
+    })
+}
+
 export const sendEnquiry = (listingId, message) => (dispatch, getState, sdk) => {
   dispatch(sendEnquiryRequest());
   const bodyParams = {
     transition: TRANSITION_ENQUIRE,
-    processAlias: config.bookingProcessAlias,
+    processAlias: config.bookingEquipmentProcessAlias,
     params: { listingId },
   };
   return sdk.transactions
@@ -296,9 +314,9 @@ export const sendEnquiry = (listingId, message) => (dispatch, getState, sdk) => 
     });
 };
 
-export const fetchTransactionLineItems = ({ bookingData, listingId, isOwnListing }) => dispatch => {
+export const fetchTransactionEquipmentLineItems = ({ bookingData, listingId, isOwnListing, isGetDiscount }) => dispatch => {
   dispatch(fetchLineItemsRequest());
-  transactionLineItems({ bookingData, listingId, isOwnListing })
+  transactionEquipmentLineItems({ bookingData, listingId, isOwnListing, isGetDiscount })
     .then(response => {
       const lineItems = response.data;
       dispatch(fetchLineItemsSuccess(lineItems));

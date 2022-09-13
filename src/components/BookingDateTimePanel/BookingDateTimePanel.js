@@ -46,6 +46,28 @@ const priceData = (price, intl) => {
   return {};
 };
 
+const sortOutFreePlanToArray = arrPlan => {
+  return arrPlan.reduce((acc,cur) => {
+    const start = Number.parseInt(cur.startTime.toString().split(':')[0])
+    const end = Number.parseInt(cur.endTime.toString().split(':')[0])
+
+    const length = end - start + 1;
+
+    const lastItem = acc[acc.length - 1];
+    const firstNewItem = `${start} ${start < 13? 'A': 'P'}M`
+
+    if (lastItem === firstNewItem) {
+      acc.pop();
+    }
+
+    acc.push(...(Array(length).fill().map((v, i) =>
+      `${i+start} ${i+start < 13? 'A': 'P'}M`
+    )))
+
+    return acc
+  }, [])
+}
+
 const BookingDateTimePanel = props => {
   const {
     rootClassName,
@@ -73,7 +95,7 @@ const BookingDateTimePanel = props => {
   const price = listing.attributes.price;
   const hasListingState = !!listing.attributes.state;
   const isClosed = hasListingState && listing.attributes.state === LISTING_STATE_CLOSED;
-  const maxTimeUsing = listing.attributes.publicData.numberHour;
+  const maxTimeUsing = listing.attributes.publicData?.numberHour || 24;
   const showClosedListingHelpText = listing.id && isClosed;
   const showBookingDatesForm = hasListingState && !isClosed;
   const { formattedPrice, priceTitle } = priceData(price, intl);
@@ -84,6 +106,9 @@ const BookingDateTimePanel = props => {
     : showClosedListingHelpText
       ? intl.formatMessage({ id: 'BookingPanel.subTitleClosedListing' })
       : null;
+  const selectOption = listing.attributes.publicData.freePlan
+    ? sortOutFreePlanToArray(listing.attributes.publicData.freePlan)
+    : undefined;
   return (
     <div className={classes}>
       <ModalInMobile
@@ -121,6 +146,7 @@ const BookingDateTimePanel = props => {
           fetchLineItemsInProgress={fetchLineItemsInProgress}
           fetchLineItemsError={fetchLineItemsError}
           maxTimeUsing={maxTimeUsing}
+          selectOption={selectOption}
         />
       </ModalInMobile>
       <div className={css.openBookingForm}>

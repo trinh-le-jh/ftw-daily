@@ -34,6 +34,9 @@ export const TRANSITION_EXPIRE_PAYMENT = 'transition/expire-payment';
 export const TRANSITION_ACCEPT = 'transition/accept';
 export const TRANSITION_DECLINE = 'transition/decline';
 
+export const TRANSITION_DECLINE_BY_OPERATOR =
+  'transition/decline-preauthorized-by-operator';
+
 // The backend automatically expire the transaction.
 export const TRANSITION_EXPIRE = 'transition/expire';
 
@@ -42,6 +45,27 @@ export const TRANSITION_CANCEL = 'transition/cancel';
 
 // The backend will mark the transaction completed.
 export const TRANSITION_COMPLETE = 'transition/complete';
+
+export const TRANSITION_CUSTOMER_CANCEL = 'transition/customer-cancel';
+export const TRANSITION_CUSTOMER_CANCEL_ACCEPT = 'transition/customer-cancel-accept';
+export const TRANSITION_PROVIDER_CANCEL = 'transition/provider-cancel';
+export const TRANSITION_PROVIDER_CANCEL_PASS_48H = 'transition/provider-cancel-pass-48h';
+export const TRANSITION_CUSTOMER_CANCEL_ACCEPT_PASS_48H =
+  'transition/customer-cancel-accept-pass-48h';
+export const TRANSITION_EXPIRE_PASS_48H = 'transition/expire-pass-48h';
+export const TRANSITION_DECLINE_PASS_48H = 'transition/decline-pass-48h';
+export const TRANSITION_CUSTOMER_CANCEL_PASS_48H = 'transition/customer-cancel-pass-48h';
+
+export const TRANSITION_PASS_48H = 'transition/pass-48h';
+export const TRANSITION_ACCEPTED_PASSED_48H = 'transition/accepted-pass-48h';
+
+export const TRANSITION_COMPLETE_PASS_48H = 'transition/complete-pass-48h';
+
+export const TRANSITION_SEND_PAYOUT_DELIVERED = 'transition/send-payout-delivered';
+export const TRANSITION_SEND_PAYOUT_REVIEWED_BY_CUSTOMER =
+  'transition/send-payout-reviewed-by-customer';
+export const TRANSITION_SEND_PAYOUT_REVIEWED_BY_PROVIDER =
+  'transition/send-payout-reviewed-by-provider';
 
 // Reviews are given through transaction transitions. Review 1 can be
 // by provider or customer, and review 2 will be the other party of
@@ -88,8 +112,13 @@ const STATE_PENDING_PAYMENT = 'pending-payment';
 const STATE_PAYMENT_EXPIRED = 'payment-expired';
 const STATE_PREAUTHORIZED = 'preauthorized';
 const STATE_DECLINED = 'declined';
+const STATE_DECLINED_BY_OPERATOR = 'declined-by-operator';
 const STATE_ACCEPTED = 'accepted';
 const STATE_CANCELED = 'canceled';
+
+const STATE_PASSED_48H = 'passed-48h';
+const STATE_ACCEPTED_PASSED_48H = 'accepted_passed-48h';
+
 const STATE_DELIVERED = 'delivered';
 const STATE_REVIEWED = 'reviewed';
 const STATE_REVIEWED_BY_CUSTOMER = 'reviewed-by-customer';
@@ -108,7 +137,7 @@ const stateDescription = {
   // id is defined only to support Xstate format.
   // However if you have multiple transaction processes defined,
   // it is best to keep them in sync with transaction process aliases.
-  id: 'flex-default-process/release-1',
+  id: 'trinh-test-process/release-1',
 
   // This 'initial' state is a starting point for new transaction
   initial: STATE_INITIAL,
@@ -138,25 +167,54 @@ const stateDescription = {
     [STATE_PREAUTHORIZED]: {
       on: {
         [TRANSITION_DECLINE]: STATE_DECLINED,
+        [TRANSITION_DECLINE_BY_OPERATOR]: STATE_DECLINED_BY_OPERATOR,
         [TRANSITION_EXPIRE]: STATE_DECLINED,
         [TRANSITION_ACCEPT]: STATE_ACCEPTED,
+        // new
+        [TRANSITION_CUSTOMER_CANCEL]: STATE_CANCELED,
+        [TRANSITION_PASS_48H]: STATE_PASSED_48H,
+      },
+    },
+    [STATE_PASSED_48H]: {
+      on: {
+        // expire
+        [TRANSITION_EXPIRE_PASS_48H]: STATE_DECLINED,
+        [TRANSITION_DECLINE_PASS_48H]: STATE_DECLINED,
+        // customer cancel
+        [TRANSITION_CUSTOMER_CANCEL_PASS_48H]: STATE_CANCELED,
+        // provider accept
+        [TRANSITION_ACCEPTED_PASSED_48H]: STATE_ACCEPTED_PASSED_48H,
       },
     },
 
     [STATE_DECLINED]: {},
+    [STATE_DECLINED_BY_OPERATOR]: {},
     [STATE_ACCEPTED]: {
       on: {
-        [TRANSITION_CANCEL]: STATE_CANCELED,
+        [TRANSITION_PROVIDER_CANCEL]: STATE_CANCELED,
+        [TRANSITION_CUSTOMER_CANCEL_ACCEPT]: STATE_CANCELED,
+
+        [TRANSITION_ACCEPTED_PASSED_48H]: STATE_ACCEPTED_PASSED_48H,
         [TRANSITION_COMPLETE]: STATE_DELIVERED,
       },
     },
 
     [STATE_CANCELED]: {},
+    [STATE_ACCEPTED_PASSED_48H]: {
+      on: {
+        [TRANSITION_PROVIDER_CANCEL_PASS_48H]: STATE_CANCELED,
+        [TRANSITION_CUSTOMER_CANCEL_ACCEPT_PASS_48H]: STATE_CANCELED,
+
+        [TRANSITION_COMPLETE_PASS_48H]: STATE_DELIVERED,
+      },
+    },
+
     [STATE_DELIVERED]: {
       on: {
         [TRANSITION_EXPIRE_REVIEW_PERIOD]: STATE_REVIEWED,
         [TRANSITION_REVIEW_1_BY_CUSTOMER]: STATE_REVIEWED_BY_CUSTOMER,
         [TRANSITION_REVIEW_1_BY_PROVIDER]: STATE_REVIEWED_BY_PROVIDER,
+        [TRANSITION_SEND_PAYOUT_DELIVERED]: STATE_DELIVERED,
       },
     },
 
@@ -164,12 +222,14 @@ const stateDescription = {
       on: {
         [TRANSITION_REVIEW_2_BY_PROVIDER]: STATE_REVIEWED,
         [TRANSITION_EXPIRE_PROVIDER_REVIEW_PERIOD]: STATE_REVIEWED,
+        [TRANSITION_SEND_PAYOUT_REVIEWED_BY_CUSTOMER]: STATE_REVIEWED_BY_CUSTOMER,
       },
     },
     [STATE_REVIEWED_BY_PROVIDER]: {
       on: {
         [TRANSITION_REVIEW_2_BY_CUSTOMER]: STATE_REVIEWED,
         [TRANSITION_EXPIRE_CUSTOMER_REVIEW_PERIOD]: STATE_REVIEWED,
+        [TRANSITION_SEND_PAYOUT_REVIEWED_BY_PROVIDER]: STATE_REVIEWED_BY_PROVIDER,
       },
     },
     [STATE_REVIEWED]: { type: 'final' },
@@ -209,6 +269,12 @@ const getTransitionsToStateFn = stateDesc => state =>
 // Get all the transitions that lead to specified state.
 const getTransitionsToState = getTransitionsToStateFn(stateDescription);
 
+
+const transitionsToDeclined = [
+  ...getTransitionsToState(STATE_DECLINED),
+  ...getTransitionsToState(STATE_DECLINED_BY_OPERATOR),
+];
+
 // This is needed to fetch transactions that need response from provider.
 // I.e. transactions which provider needs to accept or decline
 export const transitionsToRequested = getTransitionsToState(STATE_PREAUTHORIZED);
@@ -238,7 +304,7 @@ export const txIsAccepted = tx =>
   getTransitionsToState(STATE_ACCEPTED).includes(txLastTransition(tx));
 
 export const txIsDeclined = tx =>
-  getTransitionsToState(STATE_DECLINED).includes(txLastTransition(tx));
+  transitionsToDeclined.includes(txLastTransition(tx));
 
 export const txIsCanceled = tx =>
   getTransitionsToState(STATE_CANCELED).includes(txLastTransition(tx));
@@ -300,9 +366,16 @@ export const isRelevantPastTransition = transition => {
   return [
     TRANSITION_ACCEPT,
     TRANSITION_CANCEL,
+    TRANSITION_CUSTOMER_CANCEL_ACCEPT_PASS_48H,
+    TRANSITION_CUSTOMER_CANCEL_PASS_48H,
+    TRANSITION_CUSTOMER_CANCEL_ACCEPT,
+    TRANSITION_CUSTOMER_CANCEL,
+    TRANSITION_PROVIDER_CANCEL_PASS_48H,
+    TRANSITION_PROVIDER_CANCEL,
     TRANSITION_COMPLETE,
     TRANSITION_CONFIRM_PAYMENT,
     TRANSITION_DECLINE,
+    TRANSITION_DECLINE_BY_OPERATOR,
     TRANSITION_EXPIRE,
     TRANSITION_REVIEW_1_BY_CUSTOMER,
     TRANSITION_REVIEW_1_BY_PROVIDER,
@@ -310,6 +383,19 @@ export const isRelevantPastTransition = transition => {
     TRANSITION_REVIEW_2_BY_PROVIDER,
   ].includes(transition);
 };
+
+export const isValidCancelTransition = transition => {
+  return [
+    // Customer cancel
+    TRANSITION_CUSTOMER_CANCEL_ACCEPT_PASS_48H,
+    TRANSITION_CUSTOMER_CANCEL_PASS_48H,
+    TRANSITION_CUSTOMER_CANCEL_ACCEPT,
+    TRANSITION_CUSTOMER_CANCEL,
+    // Provider cancel
+    TRANSITION_PROVIDER_CANCEL_PASS_48H,
+    TRANSITION_PROVIDER_CANCEL,
+  ].includes(transition);
+}
 
 export const isCustomerReview = transition => {
   return [TRANSITION_REVIEW_1_BY_CUSTOMER, TRANSITION_REVIEW_2_BY_CUSTOMER].includes(transition);
@@ -347,3 +433,18 @@ export const isPrivileged = transition => {
     transition
   );
 };
+
+export const listTransactionToCancelOrDecline = [
+  TRANSITION_DECLINE_BY_OPERATOR,
+  TRANSITION_EXPIRE,
+  TRANSITION_DECLINE,
+  TRANSITION_DECLINE_PASS_48H,
+  TRANSITION_EXPIRE_PASS_48H,
+  TRANSITION_CANCEL,
+  TRANSITION_CUSTOMER_CANCEL_ACCEPT_PASS_48H,
+  TRANSITION_PROVIDER_CANCEL_PASS_48H,
+  TRANSITION_CUSTOMER_CANCEL_PASS_48H,
+  TRANSITION_PROVIDER_CANCEL,
+  TRANSITION_CUSTOMER_CANCEL_ACCEPT,
+  TRANSITION_CUSTOMER_CANCEL
+];

@@ -34,6 +34,7 @@ import {
   sendReview,
   fetchMoreMessages,
   fetchTransactionLineItems,
+  cancelSale,
 } from './TransactionPage.duck';
 import css from './TransactionPage.module.css';
 
@@ -69,9 +70,11 @@ export const TransactionPageComponent = props => {
     acceptInProgress,
     acceptSaleError,
     declineInProgress,
+    cancelInProgress,
     declineSaleError,
     onAcceptSale,
     onDeclineSale,
+    onCancelSale,
     timeSlots,
     fetchTimeSlotsError,
     processTransitions,
@@ -238,8 +241,10 @@ export const TransactionPageComponent = props => {
       transactionRole={transactionRole}
       onAcceptSale={onAcceptSale}
       onDeclineSale={onDeclineSale}
+      onCancelSale={onCancelSale}
       acceptInProgress={acceptInProgress}
       declineInProgress={declineInProgress}
+      cancelInProgress={cancelInProgress}
       acceptSaleError={acceptSaleError}
       declineSaleError={declineSaleError}
       nextTransitions={processTransitions}
@@ -302,6 +307,7 @@ TransactionPageComponent.propTypes = {
   declineSaleError: propTypes.error,
   acceptInProgress: bool.isRequired,
   declineInProgress: bool.isRequired,
+  cancelInProgress: bool.isRequired,
   onAcceptSale: func.isRequired,
   onDeclineSale: func.isRequired,
   scrollingDisabled: bool.isRequired,
@@ -346,6 +352,7 @@ const mapStateToProps = state => {
     declineSaleError,
     acceptInProgress,
     declineInProgress,
+    cancelInProgress,
     transactionRef,
     fetchMessagesInProgress,
     fetchMessagesError,
@@ -377,6 +384,7 @@ const mapStateToProps = state => {
     declineSaleError,
     acceptInProgress,
     declineInProgress,
+    cancelInProgress,
     scrollingDisabled: isScrollingDisabled(state),
     transaction,
     fetchMessagesInProgress,
@@ -403,6 +411,7 @@ const mapDispatchToProps = dispatch => {
   return {
     onAcceptSale: transactionId => dispatch(acceptSale(transactionId)),
     onDeclineSale: transactionId => dispatch(declineSale(transactionId)),
+    onCancelSale: (transactionId, transitionName) => dispatch(cancelSale(transactionId, transitionName)),
     onShowMoreMessages: txId => dispatch(fetchMoreMessages(txId)),
     onSendMessage: (txId, message) => dispatch(sendMessage(txId, message)),
     onManageDisableScrolling: (componentId, disableScrolling) =>

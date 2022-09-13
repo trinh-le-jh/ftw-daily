@@ -41,7 +41,12 @@ import {
 } from '../../components';
 import { TopbarContainer, NotFoundPage } from '../../containers';
 
-import { sendEnquiry, fetchTransactionLineItems, setInitialValues } from './EquipmentListingPage.duck';
+import {
+  sendEnquiry,
+  fetchTransactionEquipmentLineItems,
+  setInitialValues,
+  checkTransaction,
+} from './EquipmentListingPage.duck';
 import SectionImages from './SectionImages';
 import SectionHeading from './SectionHeading';
 import SectionGeneral from './SectionGeneral';
@@ -67,7 +72,7 @@ const priceData = (price, intl) => {
   return {};
 };
 
-export class ListingPageComponent extends Component {
+export class EquipmentListingPageComponent extends Component {
   constructor(props) {
     super(props);
     const { enquiryModalOpenForListingId, params } = props;
@@ -93,7 +98,8 @@ export class ListingPageComponent extends Component {
     const listingId = new UUID(params.id);
     const listing = getListing(listingId);
 
-    const { startDate, endDate, bookingStartHour, bookingEndHour } = values;
+    const { startDate, endDate, bookingStartHour, bookingEndHour, formType, bookingByDay } = values;
+
 
     const initialValues = {
       listing,
@@ -103,8 +109,8 @@ export class ListingPageComponent extends Component {
         unitType: 'line-item/hour'
       },
       bookingDates: {
-        bookingStart: startDate.date,
-        bookingEnd: endDate.date,
+        bookingStart: formType === 'hour' ? startDate.date : bookingByDay.startDate,
+        bookingEnd: formType === 'hour' ? endDate.date : bookingByDay.endDate,
         bookingStartHour,
         bookingEndHour,
       },
@@ -190,6 +196,7 @@ export class ListingPageComponent extends Component {
       timeSlots,
       fetchTimeSlotsError,
       filterConfig,
+      onCheckTransaction,
       onFetchTransactionLineItems,
       lineItems,
       fetchLineItemsInProgress,
@@ -229,7 +236,34 @@ export class ListingPageComponent extends Component {
     const shouldShowPublicListingPage = pendingIsApproved || pendingOtherUsersListing;
 
     if (shouldShowPublicListingPage) {
-      return <NamedRedirect name="ListingPage" params={params} search={location.search} />;
+      return <NamedRedirect name="EquipmentListingPage" params={params} search={location.search} />;
+    }
+
+    const getUserFirstTransactionData = fnParams => {
+      const currentUserFirstTransactionId = currentUser.attributes.profile?.protectedData['firstTransactionId'];
+      if (currentUserFirstTransactionId)
+        return onCheckTransaction(currentUserFirstTransactionId)
+          .then(response => {
+            return {
+              ...fnParams,
+              isGetDiscount: response,
+            }
+          })
+      else return {
+        ...fnParams,
+        isGetDiscount: true,
+      }
+
+    }
+
+    const fetchTransactionLineItems = (value) => {
+      const applyAsync = (acc, val) => acc.then(val);
+      const composeAsync = (...funcs) => x => funcs.reduce(applyAsync, Promise.resolve(x));
+      const handleFetchTransactionLineItems = composeAsync(
+        getUserFirstTransactionData,
+        onFetchTransactionLineItems,
+      );
+      return handleFetchTransactionLineItems(value)
     }
 
     const {
@@ -461,7 +495,7 @@ export class ListingPageComponent extends Component {
                   onManageDisableScrolling={onManageDisableScrolling}
                   timeSlots={timeSlots}
                   fetchTimeSlotsError={fetchTimeSlotsError}
-                  onFetchTransactionLineItems={onFetchTransactionLineItems}
+                  onFetchTransactionLineItems={fetchTransactionLineItems}
                   lineItems={lineItems}
                   fetchLineItemsInProgress={fetchLineItemsInProgress}
                   fetchLineItemsError={fetchLineItemsError}
@@ -478,7 +512,7 @@ export class ListingPageComponent extends Component {
   }
 }
 
-ListingPageComponent.defaultProps = {
+EquipmentListingPageComponent.defaultProps = {
   unitType: config.bookingEquipmentUnitType,
   currentUser: null,
   enquiryModalOpenForListingId: null,
@@ -493,7 +527,7 @@ ListingPageComponent.defaultProps = {
   fetchLineItemsError: null,
 };
 
-ListingPageComponent.propTypes = {
+EquipmentListingPageComponent.propTypes = {
   // from withRouter
   history: shape({
     push: func.isRequired,
@@ -531,6 +565,7 @@ ListingPageComponent.propTypes = {
   onInitializeCardPaymentData: func.isRequired,
   filterConfig: array,
   onFetchTransactionLineItems: func.isRequired,
+  onCheckTransaction: func.isRequired,
   lineItems: array,
   fetchLineItemsInProgress: bool.isRequired,
   fetchLineItemsError: propTypes.error,
@@ -591,8 +626,9 @@ const mapDispatchToProps = dispatch => ({
   callSetInitialValues: (setInitialValues, values, saveToSessionStorage) =>
     dispatch(setInitialValues(values, saveToSessionStorage)),
   onFetchTransactionLineItems: (bookingData, listingId, isOwnListing) =>
-    dispatch(fetchTransactionLineItems(bookingData, listingId, isOwnListing)),
+    dispatch(fetchTransactionEquipmentLineItems(bookingData, listingId, isOwnListing)),
   onSendEnquiry: (listingId, message) => dispatch(sendEnquiry(listingId, message)),
+  onCheckTransaction: (transactionId) => dispatch(checkTransaction(transactionId)),
   onInitializeCardPaymentData: () => dispatch(initializeCardPaymentData()),
 });
 
@@ -609,6 +645,6 @@ const EquipmentListingPage = compose(
     mapDispatchToProps
   ),
   injectIntl
-)(ListingPageComponent);
+)(EquipmentListingPageComponent);
 
 export default EquipmentListingPage;

@@ -13,7 +13,9 @@ const { deserialize } = require('./api-util/sdk');
 const initiateLoginAs = require('./api/initiate-login-as');
 const loginAs = require('./api/login-as');
 const transactionLineItems = require('./api/transaction-line-items');
+const transactionEquipmentLineItems = require('./api/transaction-equipment-line-items');
 const initiatePrivileged = require('./api/initiate-privileged');
+const initiatePrivilegedEquipment = require('./api/initiate-privileged-equipment');
 const transitionPrivileged = require('./api/transition-privileged');
 
 const createUserWithIdp = require('./api/auth/createUserWithIdp');
@@ -52,7 +54,9 @@ router.use((req, res, next) => {
 router.get('/initiate-login-as', initiateLoginAs);
 router.get('/login-as', loginAs);
 router.post('/transaction-line-items', transactionLineItems);
+router.post('/transaction-equipment-line-items', transactionEquipmentLineItems);
 router.post('/initiate-privileged', initiatePrivileged);
+router.post('/initiate-privileged-equipment', initiatePrivilegedEquipment);
 router.post('/transition-privileged', transitionPrivileged);
 
 // Create user with identity provider (e.g. Facebook or Google)

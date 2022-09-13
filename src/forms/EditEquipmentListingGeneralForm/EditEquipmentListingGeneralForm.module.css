@@ -47,3 +47,33 @@
 .inputNumber {
   height: 58px;
 }
+.hasEntries {
+  background-color: var(--matterColorLight);
+}
+
+.dayOfWeek {
+  width: 180px;
+  padding-top: 8px;
+  @media (--viewportSmall) {
+    width: 200px;
+  }
+}
+
+.timePicker {
+  width: 100%;
+}
+.title,
+.heading,
+.subheading,
+.timezonePicker,
+.weekDay,
+.hasEntries,
+.submitButton {
+  padding-left: 30px;
+  padding-right: 30px;
+
+  @media (--viewportSmall) {
+    padding-left: 60px;
+    padding-right: 60px;
+  }
+}

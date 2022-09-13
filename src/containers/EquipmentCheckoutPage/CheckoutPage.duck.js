@@ -1,16 +1,21 @@
-import pick from 'lodash/pick';
 import config from '../../config';
-import { initiatePrivileged, transitionPrivileged } from '../../util/api';
+import pick from 'lodash/pick';
+import { initiatePrivilegedEquipment, transitionPrivileged } from '../../util/api';
 import { denormalisedResponseEntities } from '../../util/data';
 import { storableError } from '../../util/errors';
 import {
+  isPrivileged,
+  listTransactionToCancelOrDecline,
   TRANSITION_REQUEST_PAYMENT,
   TRANSITION_REQUEST_PAYMENT_AFTER_ENQUIRY,
   TRANSITION_CONFIRM_PAYMENT,
-  isPrivileged,
 } from '../../util/transaction';
 import * as log from '../../util/log';
-import { fetchCurrentUserHasOrdersSuccess, fetchCurrentUser } from '../../ducks/user.duck';
+import {
+  fetchCurrentUserHasOrdersSuccess,
+  fetchCurrentUser,
+  currentUserShowSuccess,
+} from '../../ducks/user.duck';
 
 // ================ Action types ================ //
 
@@ -19,6 +24,10 @@ export const SET_INITIAL_VALUES = 'app/CheckoutPage/SET_INITIAL_VALUES';
 export const INITIATE_ORDER_REQUEST = 'app/CheckoutPage/INITIATE_ORDER_REQUEST';
 export const INITIATE_ORDER_SUCCESS = 'app/CheckoutPage/INITIATE_ORDER_SUCCESS';
 export const INITIATE_ORDER_ERROR = 'app/CheckoutPage/INITIATE_ORDER_ERROR';
+
+export const CHECK_TRANSACTION_REQUEST = 'app/CheckoutPage/CHECK_TRANSACTION_REQUEST';
+export const CHECK_TRANSACTION_SUCCESS = 'app/CheckoutPage/CHECK_TRANSACTION_SUCCESS';
+export const CHECK_TRANSACTION_ERROR = 'app/CheckoutPage/CHECK_TRANSACTION_ERROR';
 
 export const CONFIRM_PAYMENT_REQUEST = 'app/CheckoutPage/CONFIRM_PAYMENT_REQUEST';
 export const CONFIRM_PAYMENT_SUCCESS = 'app/CheckoutPage/CONFIRM_PAYMENT_SUCCESS';
@@ -42,6 +51,8 @@ const initialState = {
   speculateTransactionError: null,
   speculatedTransaction: null,
   transaction: null,
+  firstTransaction: null,
+  checkTransactionError: null,
   initiateOrderError: null,
   confirmPaymentError: null,
   stripeCustomerFetched: false,
@@ -81,6 +92,14 @@ export default function checkoutPageReducer(state = initialState, action = {}) {
     case INITIATE_ORDER_ERROR:
       console.error(payload); // eslint-disable-line no-console
       return { ...state, initiateOrderError: payload };
+
+    case CHECK_TRANSACTION_REQUEST:
+      return { ...state, checkTransactionError: null };
+    case CHECK_TRANSACTION_SUCCESS:
+      return { ...state, firstTransaction: payload };
+    case CHECK_TRANSACTION_ERROR:
+      console.error(payload); // eslint-disable-line no-console
+      return { ...state, checkTransactionError: payload };
 
     case CONFIRM_PAYMENT_REQUEST:
       return { ...state, confirmPaymentError: null };
@@ -125,6 +144,19 @@ const initiateOrderError = e => ({
   payload: e,
 });
 
+const checkTransactionRequest = () => ({ type: CHECK_TRANSACTION_REQUEST });
+
+const checkTransactionSuccess = order => ({
+  type: CHECK_TRANSACTION_SUCCESS,
+  payload: order,
+});
+
+const checkTransactionError = e => ({
+  type: CHECK_TRANSACTION_ERROR,
+  error: true,
+  payload: e,
+});
+
 const confirmPaymentRequest = () => ({ type: CONFIRM_PAYMENT_REQUEST });
 
 const confirmPaymentSuccess = orderId => ({
@@ -161,6 +193,25 @@ export const stripeCustomerError = e => ({
 
 /* ================ Thunks ================ */
 
+export const checkTransaction = (transactionId) => (dispatch, getState, sdk) => {
+  dispatch(checkTransactionRequest());
+
+  return sdk.transactions
+    .show({id: transactionId})
+    .then(response => {
+      const transactionData = response.data.data;
+      const lastTransition = transactionData.attributes.lastTransition
+      const isCancelOrDecline = listTransactionToCancelOrDecline.some(
+        transition => transition === lastTransition
+      )
+      dispatch(checkTransactionSuccess(transactionData));
+      return isCancelOrDecline;
+    })
+    .catch(e => {
+      dispatch(checkTransactionError(storableError(e)));
+    })
+}
+
 export const initiateOrder = (orderParams, transactionId) => (dispatch, getState, sdk) => {
   dispatch(initiateOrderRequest());
 
@@ -175,6 +226,9 @@ export const initiateOrder = (orderParams, transactionId) => (dispatch, getState
   const bookingData = {
     startDate: orderParams.bookingStart,
     endDate: orderParams.bookingEnd,
+    // For line item get by hour
+    displayStart: orderParams.displayStart,
+    displayEnd: orderParams.displayEnd,
   };
 
   const bodyParams = isTransition
@@ -184,7 +238,7 @@ export const initiateOrder = (orderParams, transactionId) => (dispatch, getState
         params: orderParams,
       }
     : {
-        processAlias: config.bookingProcessAlias,
+        processAlias: config.bookingEquipmentProcessAlias,
         transition,
         params: orderParams,
       };
@@ -193,7 +247,7 @@ export const initiateOrder = (orderParams, transactionId) => (dispatch, getState
     expand: true,
   };
 
-  const handleSucces = response => {
+  const handleSuccess = response => {
     const entities = denormalisedResponseEntities(response);
     const order = entities[0];
     dispatch(initiateOrderSuccess(order));
@@ -216,24 +270,30 @@ export const initiateOrder = (orderParams, transactionId) => (dispatch, getState
   if (isTransition && isPrivilegedTransition) {
     // transition privileged
     return transitionPrivileged({ isSpeculative: false, bookingData, bodyParams, queryParams })
-      .then(handleSucces)
+      .then(handleSuccess)
       .catch(handleError);
   } else if (isTransition) {
     // transition non-privileged
     return sdk.transactions
       .transition(bodyParams, queryParams)
-      .then(handleSucces)
+      .then(handleSuccess)
       .catch(handleError);
   } else if (isPrivilegedTransition) {
     // initiate privileged
-    return initiatePrivileged({ isSpeculative: false, bookingData, bodyParams, queryParams })
-      .then(handleSucces)
+    return initiatePrivilegedEquipment({
+      isSpeculative: false,
+      bookingData,
+      bodyParams,
+      queryParams,
+      isGetDiscount: orderParams.isGetDiscount
+    })
+      .then(handleSuccess)
       .catch(handleError);
   } else {
     // initiate non-privileged
     return sdk.transactions
       .initiate(bodyParams, queryParams)
-      .then(handleSucces)
+      .then(handleSuccess)
       .catch(handleError);
   }
 };
@@ -330,7 +390,7 @@ export const speculateTransaction = (orderParams, transactionId) => (dispatch, g
         params,
       }
     : {
-        processAlias: config.bookingProcessAlias,
+        processAlias: config.bookingEquipmentProcessAlias,
         transition,
         params,
       };
@@ -372,7 +432,13 @@ export const speculateTransaction = (orderParams, transactionId) => (dispatch, g
       .catch(handleError);
   } else if (isPrivilegedTransition) {
     // initiate privileged
-    return initiatePrivileged({ isSpeculative: true, bookingData, bodyParams, queryParams })
+    return initiatePrivilegedEquipment({
+      isSpeculative: true,
+      bookingData,
+      bodyParams,
+      queryParams,
+      isGetDiscount: orderParams.isGetDiscount
+    })
       .then(handleSuccess)
       .catch(handleError);
   } else {
@@ -397,3 +463,40 @@ export const stripeCustomer = () => (dispatch, getState, sdk) => {
       dispatch(stripeCustomerError(storableError(e)));
     });
 };
+
+export const updateUserMetadata = (metaKey, value) => {
+  return (dispatch, getState, sdk) => {
+    const queryParams = {
+      protectedData: {
+        [`${metaKey}`]: value,
+      }
+    };
+
+    return sdk.currentUser
+      .show()
+      .then(response => {
+        const entities = denormalisedResponseEntities(response);
+        if (entities.length !== 1) {
+          throw new Error('Expected a resource in the sdk.currentUser.show response');
+        }
+        return  entities[0];
+      })
+      .then(currentUser => {
+        if (currentUser.attributes.profile.protectedData[`${metaKey}`] === undefined) {
+          return dispatch(updateUserData(queryParams));
+        }
+      })
+      .catch(e => {
+        // Make sure auth info is up-to-date
+        log.error(e, 'fetch-current-user-failed', {});
+      });
+  };
+};
+
+const updateUserData = actionPayload => {
+  return (dispatch, getState, sdk) => {
+    return sdk.currentUser
+      .updateProfile(actionPayload)
+      .catch(e => log.error(e));
+  }
+}
