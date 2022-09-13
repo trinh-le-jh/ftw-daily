@@ -11,6 +11,14 @@ import config from '../../config';
 
 import css from './EditEquipmentListingGeneralPanel.module.css';
 
+const correctFreePlan = freePlan => {
+  return freePlan.reduce((acc, cur) => {
+    if (cur.startTime && cur.endTime)
+      acc.push(cur);
+    return acc;
+  }, [])
+}
+
 const EditEquipmentListingGeneralPanel = props => {
   const {
     className,
@@ -39,6 +47,35 @@ const EditEquipmentListingGeneralPanel = props => {
   ) : (
     <FormattedMessage id="EditEquipmentListingGeneralPanel.createListingTitle" />
   );
+  const handleOnSubmit = values => {
+    const {
+      title,
+      description,
+      equipmentType = [],
+      manufactureYear,
+      numberHour,
+      freePlan
+    } = values;
+
+    const updateValues = {
+      title: title.trim(),
+      description,
+      publicData: {
+        equipmentType,
+        manufactureYear: Number(manufactureYear),
+        numberHour: Number(numberHour),
+        isEquipment: true,
+      },
+    };
+
+    const validFreePlan = correctFreePlan(freePlan);
+    if (validFreePlan.length)
+      updateValues.publicData.freePlan = validFreePlan;
+    else
+      updateValues.publicData.freePlan = null;
+
+    onSubmit(updateValues);
+  }
 
   const categoryOptions = findOptionsForSelectFilter('category', config.custom.filters);
   return (
@@ -55,29 +92,7 @@ const EditEquipmentListingGeneralPanel = props => {
           freePlan: publicData.freePlan || [],
         }}
         saveActionMsg={submitButtonText}
-        onSubmit={values => {
-          const {
-            title,
-            description,
-            equipmentType = [],
-            manufactureYear,
-            numberHour,
-            freePlan
-          } = values;
-          const updateValues = {
-            title: title.trim(),
-            description,
-            publicData: {
-              equipmentType,
-              manufactureYear: Number(manufactureYear),
-              numberHour: Number(numberHour),
-              isEquipment: true,
-            },
-          };
-          if (freePlan.length)
-            updateValues.publicData.freePlan = freePlan;
-          onSubmit(updateValues);
-        }}
+        onSubmit={handleOnSubmit}
         onChange={onChange}
         disabled={disabled}
         ready={ready}

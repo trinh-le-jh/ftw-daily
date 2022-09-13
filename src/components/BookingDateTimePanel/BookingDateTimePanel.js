@@ -106,7 +106,10 @@ const BookingDateTimePanel = props => {
     : showClosedListingHelpText
       ? intl.formatMessage({ id: 'BookingPanel.subTitleClosedListing' })
       : null;
-  const selectOption = sortOutFreePlanToArray(listing.attributes.publicData.freePlan);
+  console.log('listing.attributes.publicData',listing.attributes.publicData);
+  const selectOption = listing.attributes.publicData.freePlan
+    ? sortOutFreePlanToArray(listing.attributes.publicData.freePlan)
+    : undefined;
   return (
     <div className={classes}>
       <ModalInMobile
