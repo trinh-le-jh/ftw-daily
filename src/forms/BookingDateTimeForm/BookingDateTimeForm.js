@@ -22,7 +22,7 @@ const END_HOUR= 'bookingEndHour';
 const BOOKING_BY_HOUR = 'hour';
 const BOOKING_BY_DAY = 'day';
 
-const selectOption = Array.from(
+const defaultSelectOption = Array.from(
   Array(25),
   (i, h) => `${h} ${h < 13 ? 'A' : 'P'}M`,
 )
@@ -32,8 +32,11 @@ const addTime = (date, time, bonusTime) => {
     date: time + bonusTime > 24
       ? new Date(date.getTime() + ONE_DAY).getDate()
       : date.getDate(),
+    time: (( time + bonusTime ) % 24) === 0 ? 24 : ( time + bonusTime ) % 24,
   }
 }
+
+const parseHourToNumber = hour => Number.parseInt(hour.toString().split(':')[0])
 
 export class BookingDateTimeFormComponent extends Component {
   constructor(props) {
@@ -115,6 +118,8 @@ export class BookingDateTimeFormComponent extends Component {
         bookingData: {
           startDate: startDateForFetch,
           endDate: endDateForFetch,
+          displayStart: startDateForFetch,
+          displayEnd: endDateForFetch,
           unitType: 'line-item/hour',
         },
         listingId,
@@ -126,6 +131,8 @@ export class BookingDateTimeFormComponent extends Component {
         bookingData: {
           startDate: bookingByDay.startDate,
           endDate: bookingByDay.endDate,
+          displayStart: bookingByDay.startDate,
+          displayEnd: bookingByDay.endDate,
           unitType: 'line-item/hour',
         },
         listingId,
@@ -182,8 +189,8 @@ export class BookingDateTimeFormComponent extends Component {
             fetchLineItemsInProgress,
             fetchLineItemsError,
             maxTimeUsing,
+            selectOption,
           } = fieldRenderProps;
-
 
           const {
             formType,
@@ -312,17 +319,26 @@ export class BookingDateTimeFormComponent extends Component {
           };
 
           const timeSlotsEnd = getListTimeSlotsEnd();
+          const minHourForSlice = selectOption.length
+            ? parseHourToNumber(selectOption[0])
+            : 0;
+
+          const filterSelectEndOption = () => {
+            return selectOption.reduce((acc, curHour) => {
+              const current = parseHourToNumber(curHour);
+              if (new Date(endDate.date).getDate() === minBookingDateTime.date) {
+                if (current <= maxBookingDateTime.time && current >= minBookingDateTime.time)
+                  acc.push(curHour);
+              } else {
+                if (current <= maxBookingDateTime.time)
+                  acc.push(curHour);
+              }
+              return acc;
+            },[])
+          }
 
           const selectEndOption = endDate && bookingStartHour
-            ? new Date(endDate.date).getDate() === minBookingDateTime.date
-              ? selectOption.slice(
-                minBookingDateTime.time,
-                minBookingDateTime.date === maxBookingDateTime.date
-                  ? maxBookingDateTime.time + 1
-                  : selectOption.length )
-              : selectOption.slice(
-                0,
-                maxBookingDateTime.time + 1)
+            ? filterSelectEndOption()
             : [];
 
           useEffect(() => {
@@ -350,7 +366,6 @@ export class BookingDateTimeFormComponent extends Component {
                 id="formType"
                 name="formType"
                 label={formTypeLabel}
-                className={css.timeSelector}
               >
                 <option value={BOOKING_BY_HOUR}>By hour</option>
                 <option value={BOOKING_BY_DAY}>By day</option>
@@ -493,6 +508,7 @@ BookingDateTimeFormComponent.defaultProps = {
   timeSlots: null,
   lineItems: null,
   fetchLineItemsError: null,
+  selectOption: defaultSelectOption,
 };
 
 BookingDateTimeFormComponent.propTypes = {
@@ -517,6 +533,7 @@ BookingDateTimeFormComponent.propTypes = {
   startDatePlaceholder: string,
   endDatePlaceholder: string,
   maxTimeUsing: number,
+  selectOption: array,
 };
 
 const BookingDateTimeForm = compose(injectIntl)(BookingDateTimeFormComponent);

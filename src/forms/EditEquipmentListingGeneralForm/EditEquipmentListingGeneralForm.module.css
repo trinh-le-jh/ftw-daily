@@ -54,9 +54,9 @@
 .dayOfWeek {
   width: 180px;
   padding-top: 8px;
-@media (--viewportSmall) {
-  width: 200px;
-}
+  @media (--viewportSmall) {
+    width: 200px;
+  }
 }
 
 .timePicker {
@@ -72,8 +72,8 @@
   padding-left: 30px;
   padding-right: 30px;
 
-@media (--viewportSmall) {
-  padding-left: 60px;
-  padding-right: 60px;
-}
+  @media (--viewportSmall) {
+    padding-left: 60px;
+    padding-right: 60px;
+  }
 }

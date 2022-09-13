@@ -204,7 +204,7 @@ export class CheckoutPageComponent extends Component {
         const oneDateTime = 60 * 60 * 1000 *24;
 
         const dateStart = new Date(bookingStart);
-        const dateEnd = bookingStart === bookingEnd
+        const dateEnd = bookingStart.getTime() === bookingEnd.getTime()
           ? new Date(dateStart.getTime() + oneDateTime)
           : bookingEnd;
 

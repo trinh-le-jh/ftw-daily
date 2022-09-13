@@ -46,6 +46,28 @@ const priceData = (price, intl) => {
   return {};
 };
 
+const sortOutFreePlanToArray = arrPlan => {
+  return arrPlan.reduce((acc,cur) => {
+    const start = Number.parseInt(cur.startTime.toString().split(':')[0])
+    const end = Number.parseInt(cur.endTime.toString().split(':')[0])
+
+    const length = end - start + 1;
+
+    const lastItem = acc[acc.length - 1];
+    const firstNewItem = `${start} ${start < 13? 'A': 'P'}M`
+
+    if (lastItem === firstNewItem) {
+      acc.pop();
+    }
+
+    acc.push(...(Array(length).fill().map((v, i) =>
+      `${i+start} ${i+start < 13? 'A': 'P'}M`
+    )))
+
+    return acc
+  }, [])
+}
+
 const BookingDateTimePanel = props => {
   const {
     rootClassName,
@@ -84,6 +106,7 @@ const BookingDateTimePanel = props => {
     : showClosedListingHelpText
       ? intl.formatMessage({ id: 'BookingPanel.subTitleClosedListing' })
       : null;
+  const selectOption = sortOutFreePlanToArray(listing.attributes.publicData.freePlan);
   return (
     <div className={classes}>
       <ModalInMobile
@@ -121,6 +144,7 @@ const BookingDateTimePanel = props => {
           fetchLineItemsInProgress={fetchLineItemsInProgress}
           fetchLineItemsError={fetchLineItemsError}
           maxTimeUsing={maxTimeUsing}
+          selectOption={selectOption}
         />
       </ModalInMobile>
       <div className={css.openBookingForm}>
