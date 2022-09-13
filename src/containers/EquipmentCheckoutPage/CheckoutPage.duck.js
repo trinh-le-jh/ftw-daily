@@ -25,6 +25,10 @@ export const INITIATE_ORDER_REQUEST = 'app/CheckoutPage/INITIATE_ORDER_REQUEST';
 export const INITIATE_ORDER_SUCCESS = 'app/CheckoutPage/INITIATE_ORDER_SUCCESS';
 export const INITIATE_ORDER_ERROR = 'app/CheckoutPage/INITIATE_ORDER_ERROR';
 
+export const CHECK_TRANSACTION_REQUEST = 'app/CheckoutPage/CHECK_TRANSACTION_REQUEST';
+export const CHECK_TRANSACTION_SUCCESS = 'app/CheckoutPage/CHECK_TRANSACTION_SUCCESS';
+export const CHECK_TRANSACTION_ERROR = 'app/CheckoutPage/CHECK_TRANSACTION_ERROR';
+
 export const CONFIRM_PAYMENT_REQUEST = 'app/CheckoutPage/CONFIRM_PAYMENT_REQUEST';
 export const CONFIRM_PAYMENT_SUCCESS = 'app/CheckoutPage/CONFIRM_PAYMENT_SUCCESS';
 export const CONFIRM_PAYMENT_ERROR = 'app/CheckoutPage/CONFIRM_PAYMENT_ERROR';
@@ -47,6 +51,8 @@ const initialState = {
   speculateTransactionError: null,
   speculatedTransaction: null,
   transaction: null,
+  firstTransaction: null,
+  checkTransactionError: null,
   initiateOrderError: null,
   confirmPaymentError: null,
   stripeCustomerFetched: false,
@@ -86,6 +92,14 @@ export default function checkoutPageReducer(state = initialState, action = {}) {
     case INITIATE_ORDER_ERROR:
       console.error(payload); // eslint-disable-line no-console
       return { ...state, initiateOrderError: payload };
+
+    case CHECK_TRANSACTION_REQUEST:
+      return { ...state, checkTransactionError: null };
+    case CHECK_TRANSACTION_SUCCESS:
+      return { ...state, firstTransaction: payload };
+    case CHECK_TRANSACTION_ERROR:
+      console.error(payload); // eslint-disable-line no-console
+      return { ...state, checkTransactionError: payload };
 
     case CONFIRM_PAYMENT_REQUEST:
       return { ...state, confirmPaymentError: null };
@@ -130,6 +144,19 @@ const initiateOrderError = e => ({
   payload: e,
 });
 
+const checkTransactionRequest = () => ({ type: CHECK_TRANSACTION_REQUEST });
+
+const checkTransactionSuccess = order => ({
+  type: CHECK_TRANSACTION_SUCCESS,
+  payload: order,
+});
+
+const checkTransactionError = e => ({
+  type: CHECK_TRANSACTION_ERROR,
+  error: true,
+  payload: e,
+});
+
 const confirmPaymentRequest = () => ({ type: CONFIRM_PAYMENT_REQUEST });
 
 const confirmPaymentSuccess = orderId => ({
@@ -167,6 +194,8 @@ export const stripeCustomerError = e => ({
 /* ================ Thunks ================ */
 
 export const checkTransaction = (transactionId) => (dispatch, getState, sdk) => {
+  dispatch(checkTransactionRequest());
+
   return sdk.transactions
     .show({id: transactionId})
     .then(response => {
@@ -175,7 +204,11 @@ export const checkTransaction = (transactionId) => (dispatch, getState, sdk) => 
       const isCancelOrDecline = listTransactionToCancelOrDecline.some(
         transition => transition === lastTransition
       )
+      dispatch(checkTransactionSuccess(transactionData));
       return isCancelOrDecline;
+    })
+    .catch(e => {
+      dispatch(checkTransactionError(storableError(e)));
     })
 }
 

@@ -319,9 +319,6 @@ export class BookingDateTimeFormComponent extends Component {
           };
 
           const timeSlotsEnd = getListTimeSlotsEnd();
-          const minHourForSlice = selectOption.length
-            ? parseHourToNumber(selectOption[0])
-            : 0;
 
           const filterSelectEndOption = () => {
             return selectOption.reduce((acc, curHour) => {

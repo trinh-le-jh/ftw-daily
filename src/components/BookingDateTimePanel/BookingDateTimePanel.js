@@ -95,7 +95,7 @@ const BookingDateTimePanel = props => {
   const price = listing.attributes.price;
   const hasListingState = !!listing.attributes.state;
   const isClosed = hasListingState && listing.attributes.state === LISTING_STATE_CLOSED;
-  const maxTimeUsing = listing.attributes.publicData.numberHour;
+  const maxTimeUsing = listing.attributes.publicData?.numberHour || 24;
   const showClosedListingHelpText = listing.id && isClosed;
   const showBookingDatesForm = hasListingState && !isClosed;
   const { formattedPrice, priceTitle } = priceData(price, intl);
